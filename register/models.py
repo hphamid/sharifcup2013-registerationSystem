@@ -12,23 +12,32 @@ from django.template import Context
 
 
 class Superviser(models.Model):
+    messages = {
+        'blank': u'این فیلد نمی‌تواند خالی باشد',
+        'invalid': u'اطلاعات وارد شده معتبر نیست!',
+        'unique': u'کاربری با این شماره‌ی ملی قبلا ثبت‌نام کرده است!'
+    }
     user = models.OneToOneField(User, default=0)
-    phone = models.CharField(max_length=20, blank=False)
-    nationalID = models.CharField(unique=True, max_length=11, blank=False)
-    age = models.CharField(max_length=3, blank=False)
-    errorMessage = []
+    phone = models.CharField(max_length=20, blank=False, error_messages=messages)
+    nationalID = models.CharField(unique=True, max_length=11, blank=False, error_messages=messages)
+    age = models.CharField(max_length=3, blank=False, error_messages=messages)
+    errorMessage = {}
 
     def save(this, *args, **kwargs):
-        this.errorMessage = []
+        this.errorMessage = {}
         try:
             this.full_clean()
         except ValidationError as e:
-            this.errorMessage.append(str(e))
+            for key, value in e.message_dict.items():
+                this.errorMessage[key] = []
+                for message in value:
+                    this.errorMessage[key].append(unicode(message))
         else:
             try:
                 super(Superviser, this).save(*args, **kwargs)
             except:
-                this.errorMessage = [u'مشکلی در هنگام ذخیره به وجود آمد!']
+                this.errorMessage['all'] = [
+                    'مشکلی در هنگام ذخیره به وجود آمد!']
 
     def issaved(this):
         return not this.errorMessage
@@ -50,30 +59,46 @@ class League(models.Model):
 
 
 class Team(models.Model):
-    name = models.CharField(max_length=30)
+    messages = {
+        'blank': u'این فیلد نمی‌تواند خالی باشد',
+        'invalid': u'اطلاعات وارد شده معتبر نیست!'
+    }
+    name = models.CharField(
+        max_length=30, blank=False, error_messages=messages)
     # users = models.ManyToManyField(Participant)
     superviser = models.ForeignKey(User)
-    league = models.ForeignKey(League)
-    errorMessage = []
+    league = models.ForeignKey(League, blank=False, error_messages=messages)
+    is_active = models.PositiveSmallIntegerField(default=1)
+    errorMessage = {}
 
     def clean(this):
-        temp = Team.objects.filter(
-            league=this.league, name=this.name).exclude(id=this.id)
-        if temp:
-            raise ValidationError(
-                u'تیمی با نام وادر شده در این لیگ وجود دارد!')
+        if this.league:
+            temp = Team.objects.filter(
+                league=this.league, name=this.name).exclude(id=this.id)
+            if temp:
+                this.errorMessage['all'] = [
+                    'تیمی با نام وارد شده در این لیگ وجود دارد!']
+                raise ValidationError('all',
+                                      u'تیمی با نام وارد شده در این لیگ وجود دارد!')
 
     def save(this, *args, **kwargs):
-        this.errorMessage = []
+        this.errorMessage = {}
         try:
             this.full_clean()
         except ValidationError as e:
-            this.errorMessage.append(str(e))
+            for key, value in e.message_dict.items():
+                this.errorMessage[key] = []
+                for message in value:
+                    this.errorMessage[key].append(unicode(message))
+        except:
+            this.errorMessage['all'] = [
+                'مشکلی در هنگام ذخیره به وجود آمد! لیگ را انتخاب کرده‌اید؟!']
         else:
             try:
                 super(Team, this).save(*args, **kwargs)
             except:
-                this.errorMessage = [u'مشکلی در هنگام ذخیره به وجود آمد!']
+                this.errorMessage['all'] = [
+                    'مشکلی در هنگام ذخیره به وجود آمد!']
 
     def issaved(this):
         return not this.errorMessage
@@ -111,8 +136,9 @@ class Participant(models.Model):
         max_length=20, blank=False, error_messages=messages)
     age = models.CharField(max_length=3, blank=False, error_messages=messages)
     superviser = models.ForeignKey(User)
-    team = models.ManyToManyField(Team, null=True)
+    team = models.ManyToManyField(Team, null=True, blank=True)
     activate = models.BooleanField(default=False)
+    is_active = models.PositiveSmallIntegerField(default=1)
     errorMessage = {}
     __securityString = "security string for increading something! :)))"
 
@@ -141,11 +167,9 @@ class Participant(models.Model):
     def issaved(this):
         return not this.errorMessage
 
-    def activateUserEmailAddress(this, email, text):
-        this.email = this.user.email
-        this.username = this.user.username
+    def activateUserEmailAddress(this, text):
         if text == this.makeActivationAddress():
-            this.user.is_active = True
+            this.user.activate = True
             this.user.save()
             return True
         return False

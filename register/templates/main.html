@@ -1,12 +1,117 @@
-<!DOCTYPE html>
 {% load static %}
-<html>
+
+<!DOCTYPE html>
+<!--[if IE 6]>
+<html id="ie6" dir="rtl" lang="fa-IR">
+<![endif]-->
+<!--[if IE 7]>
+<html id="ie7" dir="rtl" lang="fa-IR">
+<![endif]-->
+<!--[if IE 8]>
+<html id="ie8" dir="rtl" lang="fa-IR">
+<![endif]-->
+<!--[if !(IE 6) | !(IE 7) | !(IE 8)  ]><!-->
+
+<html dir="rtl" lang="fa-IR">
+  <!--<![endif]-->
   <head>
-      <title> test </title>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="keywords" content="sharif cup , sharif cup 2013 , sharifcup 2013 , شریفکاپ , شریف کاپ , شریف کاپ ۲۰۱۳ , رباتیک , رباتیک آزاد , مسابقات رباتیک" >
+    <meta name="description" content="Here is all about sharif cup 2013 open robotics challenge
+سایت رسمی مسابقات باز رباتیک شریف کاپ ۲۰۱۳">
+    <title>
+
+      شریف کاپ | مسابقات آزاد رباتیک شریف   </title>
+    <style type="text/css">
+      @font-face {
+      font-family: 'BMitra';
+      src: url('http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/fonts/BMitra.eot?#') format('eot'),
+      url('http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/fonts/BMitra.woff') format('woff'),
+      url('http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/fonts/BMitra.ttf') format('truetype');
+      font-weight: normal;
+      }
+      @font-face {
+      font-family: 'BAban';
+      src: url('http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/fonts/BAban.ttf') format('truetype');
+      font-weight: bold;
+      }
+    </style>
+    <link rel="shortcut icon" href="http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/images/Logo16-16.png">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" media="all" href="http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/style.css" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Petit+Formal+Script">
+    <style>
+      #header{
+        background-image:url("http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/images/header.jpg");
+      }
+    </style>
+    <link rel='stylesheet' id='contact-form-7-css'  href='http://sharifcup.sharif.ir/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=3.4.1' type='text/css' media='all' />
+<link rel='stylesheet' id='contact-form-7-rtl-css'  href='http://sharifcup.sharif.ir/wp-content/plugins/contact-form-7/includes/css/styles-rtl.css?ver=3.4.1' type='text/css' media='all' />
+<script type='text/javascript' src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<link rel='stylesheet' id='news-css'  href='http://sharifcup.sharif.ir/wp-content/plugins/news/css/news.css?ver=3.5.1' type='text/css' media='all' />
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/js/jquery.min.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/plugins/news/js/jquery.easing.min.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/plugins/news/js/news.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/js/jquery.easing.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/js/jquery.jsquares.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/slider/js/slider.js?ver=3.5.1'></script>
+<script type='text/javascript' src='http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/news/js/msAccordionMECP.js?ver=3.5.1'></script>
+  <style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+        <script type="text/javascript">
+      $(document).ready(function(){
+        jQuery("head").append("<style>body{"
+          +"background-image:url(\"http://sharifcup.sharif.ir/wp-content/themes/sharifcup2013/timthumb.php?src=./images/background.jpg&w="+$(window).width()+"&h="+$(window).height()+"&q=80\");"
+          +"}"
+          +"</style>"
+          );
+      });
+    </script>
   </head>
   <body>
-    {% block page %}
+    <div id="main">
+      <div id="header">
+      </div>
+      <div id="topmenu">
+        <div id="cmenu" class="cmenu">
+          <div id="menuContent">
+            <ul class="menu"><li id="home"><a href="http://sharifcup.sharif.ir/"><span class="melement">خانه</span></a></li>
+            {% block menu %}
+              {% include menu.html %}
+            {% endblock %}
+          </ul>
+          </div>
+        </div>
+      </div>
+      <div id="ajax" class="body">
+      {% block page %}
     {% endblock page %}
-  </body>
+﻿</div><!--body-->
+<div id='footer'>
+  <div class = "footbar">
+    <div id="text-2" class="fwidget widget_text"><h4 class="ftitle">برگزارکنندگان</h4>      <div class="textwidget">  <a href = "http://sharif.ir" target="_blank">
+  <img class="bimages" src="http://sharifcup.sharif.ir/logo/Sharif_W.png" alt="" style="display: inline-block; width: 60px; height: 60px;" alt="دانشگاه صنعتی شریف">
+  </a>
+  <a href="http://eeresana.com" target="_blank">
+  <img class="bimages" src="http://sharifcup.sharif.ir/logo/Resana_W.png" alt="" style="display: inline-block; width: 60px; height: 60px;" alt="کانون علمی فرهنگی رسانا">
+  </a></div>
+  </div>
+    <div class="copyright">
+      © تمامی حقوق مادی و معنوی این سایت در اختیار
+      <a href = "http://sharifcup.sharif.ir">
+        <b>
+        شریف کاپ
+        </b>
+      </a>
+      است.
+    </div>
+    <span class="designer" >
+
+    Designed by Hamid Pourrabi with the help of<a href="http://ee.sharif.ir/~mmazaheri/" target="_blank"> Mahdi Mazaheri</a>
+    </span>
+</div><!--.footer-->
+<? wp_footer(); ?>
+</div><!--.main-->
+</body>
 </html>

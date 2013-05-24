@@ -1,0 +1,38 @@
+{% extends "main.html" %}
+{% block page %}
+{% for a in error.all %}
+    {{ a|safe }}<br>
+  {% endfor %}
+<form action="
+{% if id %}
+  {% url 'editTeam' id %}
+{% else %}
+  {% url 'createTeam' %}
+{% endif %}
+" method = "post">
+  {% csrf_token %}
+  نام:
+  <input type = "text" name = "name" value = "{{oldValue.name}}"/><br>
+  {% for a in error.name %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  <select name = "league">
+    {% if oldValue.league %}
+    {% else %}
+      <option value="" selected="selected" disabled="disabled">لیگ</option>
+    {% endif %}
+    {% for key, value in leagues.items %}
+      <option value="{{ value }}"
+      {% if oldValue.league.id == value %}
+      selected="selected"
+      {% endif %}
+      >{{ key }}</option>
+
+    {% endfor %}
+  </select>
+  {% for a in error.name %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  <input type = "submit" value="ذخیره">
+</form>
+{% endblock page %}

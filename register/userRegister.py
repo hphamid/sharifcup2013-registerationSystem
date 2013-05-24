@@ -1,7 +1,7 @@
 # -*- coding: UTF8
 
 from django.contrib.auth.models import User
-from first.models import Superviser
+from register.models import Superviser
 from django.contrib.auth import authenticate, login
 import re
 # for email:
@@ -14,28 +14,30 @@ import hashlib
 # import random
 
 
-class myUser():  # this class contains function to use for flight users! :)
-    __messages = {'badUsername': 'نام کاربری مشکل دراد!',
-                  'badEmail': 'ایمی وارد شده معتبر نیست!',
+class MyUser():  # this class contains function to use for flight users! :)
+    __messages = {'badUsername': 'نام کاربری معتبر نیست!',
+                  'badEmail': 'ایمیل وارد شده معتبر نیست!',
                   'badPassword': 'پسورد وارد شده معتبر نیست',
                   'emailExists': 'کاربری با ایمیل وارد شده موجود است.',
-                  'usernameExists': 'نام کاربری دی سیستم موجود است.',
+                  'usernameExists': 'نام کاربری در سیستم موجود است.',
                   'failed': 'اطلاعات وارد شده صحیح نیست! لطفا دوبراه بررسی کنید.'
                   }
-
-    def __init__(this, username=None, password=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, isActive=False, loginAfterRegister=False):
-        this.username = email
+    __securityString = "security string for increading something in MyUser! :)))"
+    def __init__(this, username=None, password=None, password2=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, isActive=False, loginAfterRegister=False):
+        this.username = username
         this.email = email
         this.name = name
         this.lastname = lastname
         this.password = password
+        this.password2 = password2
         this.phone = phone
         this.nationalID = nationalID
         this.age = age
         this.user = None
+        this.profile = None
         this.isActive = isActive
         # this.loginAfterRegister = loginAfterRegister
-        this.message = []
+        this.message = {}
 
     # def makeSureThereIsprofile(this):
     # try:  # to make sure there is appropiate profile for each user! :)
@@ -55,8 +57,11 @@ class myUser():  # this class contains function to use for flight users! :)
         if this.getUser():
             this.name = this.user.first_name
             this.lastname = this.user.last_name
-            this.username = this.user.username
-            # this.email = this.email
+            this.email = this.user.email
+            this.getprofile()
+            this.phone = this.profile.phone
+            this.nationalID = this.profile.nationalID
+            this.age = this.profile.age
             return True
         return False
 
@@ -83,14 +88,16 @@ class myUser():  # this class contains function to use for flight users! :)
             return True
         return False
 
-    def updateUser(this):
+    def updateUser(this, request):
         if this.getUser():
-            emailIsChanged = this.user.email == this.email
+            emailIsChanged = not this.user.email == this.email
+            print this.user.email
+            print this.email
             this.isActive = this.user.is_active and not emailIsChanged
-            this.saveInformation()
+            this.saveInformation(True)
             if this.issaved():
                 if emailIsChanged:
-                    this.sendMail
+                    this.sendMail(request)
                 return True
         return False
 
@@ -100,10 +107,22 @@ class myUser():  # this class contains function to use for flight users! :)
                 this.username, this.email, this.password)  # using django users and making a new user object
             this.saveInformation()
             if this.issaved():
-                this.sendMail()
+                this.sendMail(request)
                 return True
         try:  # to make sure no extra user is made! :)
             this.user.delete()
+        except:
+            return True
+        return False
+
+    def getprofile(this):
+        this.profile = this.user.superviser
+
+    def getUser(this):  # this function returns true if user exists
+        try:
+            this.user = User.objects.get(username=this.username)
+            if this.user:
+                return True
         except:
             pass
         return False
@@ -111,31 +130,36 @@ class myUser():  # this class contains function to use for flight users! :)
     def issaved(this):
         return not this.message
 
-    def saveInformation(this):
+    def saveInformation(this, update=False):
         this.user.first_name = this.name
         this.user.last_name = this.lastname
         this.user.is_staff = False
         this.user.is_active = this.isActive
         this.user.is_superuser = False
-        this.user.profile = Superviser()
-        this.user.profile.phone = this.phone
-        this.user.profile.nationalID = this.nationalID
-        this.user.profile.age = this.age
-        tempProfile = this.user.profile.save()
-        if tempProfile:
+        this.user.email = this.email
+        if update:
+            this.profile = Superviser.objects.get(user=this.user)
+        else:
+            this.profile = Superviser()
+        this.profile.phone = this.phone
+        this.profile.nationalID = this.nationalID
+        this.profile.age = this.age
+        this.profile.user = this.user
+        this.profile.save()
+        if this.profile.issaved():
             try:
                 this.user.save()  # saving the new object
             except:
-                this.message.append(this.__messages['failed'])
+                this.message['all'] = [this.__messages['failed'], ]
         else:
-            this.message.append(tempProfile.error_message)
+            this.message.update(this.profile.errorMessage)
 
-    def sendMail(this):  # this function send activation email! :) (the html part must be edited! :P)
+    def sendMail(this, request):  # this function send activation email! :)
         if this.updateInformation():
-            plaintext = get_template('mail/activationEmail.txt')
-            htmly = get_template('mail/activationemail.html')
+            plaintext = get_template('mail/supervactivationEmail.txt')
+            htmly = get_template('mail/supervactivationemail.html')
             d = Context({'name': this.name, 'lastname': this.lastname,
-                        'address': this.makeActivationLink()})
+                        'address': this.makeActivationLink(request.META['REMOTE_HOST'])})
             subject, from_email, to = 'SharifcupRegister', 'info@sharifcup.sharif.ir', this.email
             text_content = plaintext.render(d)
             html_content = htmly.render(d)
@@ -155,21 +179,21 @@ class myUser():  # this class contains function to use for flight users! :)
         if re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", this.email):
             return True
         else:
-            this.message.append(this.__messages['badEmail'])
+            this.message['email'] = [this.__messages['badEmail'], ]
             return False
 
     def validateUserName(this):  # this function check if given username can be valid or not (just for syntax!)
         if this.username:
             return True
         else:
-            this.message = this.__messages['badUsername']
+            this.message['username'] = [this.__messages['badUsername'], ]
             return False
 
     def validatePassword(this):  # this function check password to be valid
-        if this.password:
+        if this.password and this.password == this.password2:
             return True
         else:
-            this.message.append(this.__messages['badPassword'])
+            this.message['password'] = [this.__messages['badPassword'], ]
             return False
 
     def validateOther(this):  # this function is for development! :)
@@ -183,9 +207,9 @@ class myUser():  # this class contains function to use for flight users! :)
 
     def emailExists(this):  # this check if this email exists or not!
         try:
-            user = User.objects.filter(email=this.email)
-            if user.count() > 0:
-                this.message.append(this.__messages['emailExists'])
+            user = User.objects.filter(email=this.email).exclude(username=this.username)
+            if user:
+                this.message['email'] = [this.__messages['emailExists'], ]
                 return True
         except:
             pass
@@ -194,7 +218,7 @@ class myUser():  # this class contains function to use for flight users! :)
     def usernameExists(this):  # check if username exists or not
         try:
             User.objects.get(username=this.username)
-            this.message.append(this.__messages['usernameExists'])
+            this.message['username'] = [this.__messages['usernameExists'], ]
             return True
         except:
             pass

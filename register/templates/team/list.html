@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+<style type="text/css">
+  td.dynamic span{
+    visibility: hidden;
+  }
+  td.dynamic span a{
+    padding-right:3px;
+    padding-left:3px;
+  }
+  .table tr:hover td.dynamic span{
+    visibility: visible;
+  }
+</style>
+<table class="table table-striped">
+  <thead>
+    <tr>
+    <th>نام تیم</th>
+    <th>لیگ</th>
+    <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in teams %}
+    <tr>
+      <td>{{ a.name }}</td>
+      <td>{{ a.league.name }}</td>
+      <td  class ="dynamic"><span><a href = "{% url 'deleteTeam' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editTeam' a.id%}" style="color:blue">ویرایش</a> <a href = "{% url 'userTeam' a.id%}" style="color:blue">اعضا</a></span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

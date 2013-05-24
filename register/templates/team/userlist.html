@@ -22,29 +22,17 @@
     <th>نام خانوادگی</th>
     <th>ایمیل</th>
     <th>شمار‌ه‌ی ملی</th>
-    <th>وضعیت</th>
     <th></th>
     </tr>
   </thead>
   <tbody>
-    {% for a in participants %}
-    <tr {% if a.activate %}
-          class="success"
-        {% else %}
-          class="warning"
-        {% endif %}>
+    {% for a in users %}
+    <tr>
       <td>{{ a.name }}</td>
       <td>{{ a.fname }}</td>
       <td>{{ a.email }}</td>
       <td>{{ a.nationalID }}</td>
-      <td>
-        {% if a.activate %}
-          تایید شده
-        {% else %}
-          درحال بررسی
-        {% endif %}
-      </td>
-      <td  class ="dynamic"><span><a href = "{% url 'deleteParticipant' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editParticipant' a.id%}" style="color:blue">ویرایش</a></span></td>
+      <td  class ="dynamic"><span><a href = "{% url 'editParticipant' a.id%}" style="color:blue">ویرایش</a></span></td>
     </tr>
     {% endfor %}
   </tbody>

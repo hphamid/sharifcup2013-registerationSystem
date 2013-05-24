@@ -1,0 +1,156 @@
+{% extends "main.html" %}
+{% load static %}
+{% block menu %}
+{% if logedinUser %}
+  {% include 'loggedinMenu.html' %}
+{% else %}
+  {% include 'menu.html' %}
+{% endif %}
+{% endblock %}
+{% block page %}
+{% for a in error.all %}
+  <div class="alert alert-error">
+    {{ a|safe }}
+  </div>
+{% endfor %}
+<style type="text/css">
+/*  #ajax{
+    background-image:url('{% static 'Glass.png' %}');
+    background-color:rgba(20, 0, 8,0.9);
+  }*/
+</style>
+<form class="form-horizontal" action="
+{% if logedinUser %}
+  {% url 'profile' %}
+{% else %}
+  {% url 'register' %}
+{% endif %}
+" method = "post" style="margin-top: 19px;">
+  {% csrf_token %}
+  <div class="control-group">
+    <label class="control-label" for="username">نام کاربری</label>
+    <div class="controls">
+      <input type="text"
+      {% if not logedinUser %}
+          name = "username"
+      {% else %}
+          disabled="disabled"
+      {% endif %}
+        value = "{{oldValue.username}}" id="username" placeholder="نام کاربری">
+    </div>
+  </div>
+  {% for a in error.username %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  {% if not logedinUser %}
+    <div class="control-group">
+      <label class="control-label" for="password">کلمه‌ی عبور</label>
+      <div class="controls">
+        <input type="password" name = "password" id="password" placeholder="کلمه‌ی عبور">
+      </div>
+    </div>
+    {% for a in error.password %}
+       <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+    {% endfor %}
+    <div class="control-group">
+      <label class="control-label" for="password2">تکرار کلمه‌ي عبور</label>
+      <div class="controls">
+        <input type="password" name = "password2" id="password2" placeholder="تکرار کلمه‌ی عبور">
+      </div>
+    </div>
+  {% endif %}
+  <div class="control-group">
+    <label class="control-label" for="name">نام</label>
+    <div class="controls">
+      <input type="text" name = "name" value = "{{oldValue.name}}" id="name" placeholder="نام">
+    </div>
+  </div>
+  {% for a in error.name %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label" for="lastname">نام</label>
+    <div class="controls">
+      <input type="text" name = "lastname" value = "{{oldValue.lastname}}" id="lastname" placeholder="نام خانوادگی">
+    </div>
+  </div>
+  {% for a in error.lastname %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label" for="email">ایمیل</label>
+    <div class="controls">
+      <input type="text" name = "email" value = "{{oldValue.email}}" id="emailب" placeholder="ایمیل">
+    </div>
+  </div>
+  {% for a in error.email %}
+    <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label" for="nationalID">شماره‌ی ملی</label>
+    <div class="controls">
+      <input type="text" name = "nationalID" value = "{{oldValue.nationalID}}" id="nationalID" placeholder="شماره‌ی ملی">
+    </div>
+  </div>
+  {% for a in error.nationalID %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label" for="age">سن</label>
+    <div class="controls">
+      <input type="text" name = "age" value = "{{oldValue.age}}" id="age" placeholder="سن">
+    </div>
+  </div>
+  {% for a in error.age %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label" for="phone">تلفن</label>
+    <div class="controls">
+      <input type="text" name = "phone" value = "{{oldValue.phone}}" id="phone" placeholder="تلفن">
+    </div>
+  </div>
+  {% for a in error.phone %}
+     <div class ="control-group " style="text-align:center">
+     <div class="span4 alert alert-error" style="margin-bottom:0px;">
+      {{ a|safe }}
+     </div>
+    </div>
+  {% endfor %}
+  <div class="control-group">
+    <label class="control-label"></label>
+    <div class="controls">
+      <button type="submit" class="btn btn-primary">ذخیره</button>
+    </div>
+  </div>
+</form>
+
+{% endblock page %}

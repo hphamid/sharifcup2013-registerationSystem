@@ -1,0 +1,10 @@
+{% extends "main.html" %}
+{% block page %}
+شما می‌خواهید تیم زیر را پاک کنید!
+<form action="{% url 'deleteTeam' id %}" method = "post">
+  {% csrf_token %}
+  آیا مطمئن هستید؟
+  <input type = "submit" name="approve" value="بلی"><br>
+<input type = "submit" value="خیر"><br>
+</form>
+{% endblock page %}

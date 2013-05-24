@@ -159,4 +159,7 @@ EMAIL_HOST = "mail.eeresana.com"
 EMAIL_HOST_PASSWORD = "1Hphamid"
 EMAIL_HOST_USER = "hamid@eeresana.com"
 DEFAULT_FROM_EMAIL = "admin@flypgs.com"
+DEFAULT_FROM_NAME = "sharifcup"
 AUTH_PROFILE_MODULE = 'register.Superviser'
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/redirect/"
