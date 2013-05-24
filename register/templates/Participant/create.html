@@ -1,0 +1,60 @@
+{% extends "main.html" %}
+{% block page %}
+{% for a in error.all %}
+    {{ a|safe }}<br>
+  {% endfor %}
+<form action="
+{% if id %}
+  {% url 'editParticipant' id %}
+{% else %}
+  {% url 'createParticipant' %}
+{% endif %}
+" method = "post">
+  {% csrf_token %}
+  نام:
+  <input type = "text" name = "name" value = "{{oldValue.name}}"/><br>
+  {% for a in error.name %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  نام خانوادگی:
+  <input type = "text" name = "fname" value = "{{oldValue.fname}}"/><br>
+  {% for a in error.fname %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  ایمیل:
+  <input type = "text" name = "email" value = "{{oldValue.email}}"/><br>
+  {% for a in error.email %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  شماره‌ی ملی:
+  <input type = "text" name = "nationalID" value = "{{oldValue.nationalID}}"/><br>
+  {% for a in error.nationalID %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  سن:
+  <input type = "text" name = "age" value = "{{oldValue.age}}"/><br>
+  {% for a in error.age %}
+    {{ a|safe }}<br>
+  {% endfor %}
+  تلفن:
+  <input type = "text" name = "phone" value = "{{oldValue.phone}}"/><br>
+  {% for a in error.phone %}
+    {{ a|safe }}<br>
+  {% endfor %}
+‍  تیم:<br>
+{% for key, value in team.items %}
+  {% if value %}
+  {{key}}: <br>
+  {% for a in value %}
+    <input type="radio" name="league-{{ a.league.id }}" value="{{a.id}}"
+    {% if a in oldValue.team.all%}
+      checked="True"
+    {% endif %}
+    >{{a}}<br>
+
+  {% endfor %}
+  {% endif %}
+{% endfor %}
+  <input type = "submit" value="ذخیره">
+</form>
+{% endblock page %}

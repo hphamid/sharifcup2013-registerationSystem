@@ -1,0 +1,6 @@
+{% extends "main.html" %}
+{% block page %}
+{% for a in participants %}
+  {{ a.name }} {{ a.fname }} {{ a.id }}<br>
+{% endfor %}
+{% endblock %}
