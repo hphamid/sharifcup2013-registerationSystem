@@ -23,7 +23,8 @@ class MyUser():  # this class contains function to use for flight users! :)
                   'failed': 'اطلاعات وارد شده صحیح نیست! لطفا دوبراه بررسی کنید.'
                   }
     __securityString = "security string for increading something in MyUser! :)))"
-    def __init__(this, username=None, password=None, password2=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, isActive=False, loginAfterRegister=False):
+
+    def __init__(this, username=None, password=None, password2=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, gender=None, night=None, isActive=False, loginAfterRegister=False):
         this.username = username
         this.email = email
         this.name = name
@@ -33,6 +34,8 @@ class MyUser():  # this class contains function to use for flight users! :)
         this.phone = phone
         this.nationalID = nationalID
         this.age = age
+        this.gender = gender
+        this.night = night
         this.user = None
         this.profile = None
         this.isActive = isActive
@@ -62,6 +65,8 @@ class MyUser():  # this class contains function to use for flight users! :)
             this.phone = this.profile.phone
             this.nationalID = this.profile.nationalID
             this.age = this.profile.age
+            this.gender = this.profile.gender
+            this.night = this.profile.night
             return True
         return False
 
@@ -89,7 +94,7 @@ class MyUser():  # this class contains function to use for flight users! :)
         return False
 
     def updateUser(this, request):
-        if this.getUser():
+        if this.getUser() and this.canUpdateUser():
             emailIsChanged = not this.user.email == this.email
             print this.user.email
             print this.email
@@ -118,15 +123,6 @@ class MyUser():  # this class contains function to use for flight users! :)
     def getprofile(this):
         this.profile = this.user.superviser
 
-    def getUser(this):  # this function returns true if user exists
-        try:
-            this.user = User.objects.get(username=this.username)
-            if this.user:
-                return True
-        except:
-            pass
-        return False
-
     def issaved(this):
         return not this.message
 
@@ -144,6 +140,8 @@ class MyUser():  # this class contains function to use for flight users! :)
         this.profile.phone = this.phone
         this.profile.nationalID = this.nationalID
         this.profile.age = this.age
+        this.profile.gender = this.gender
+        this.profile.night = this.night
         this.profile.user = this.user
         this.profile.save()
         if this.profile.issaved():
@@ -159,7 +157,7 @@ class MyUser():  # this class contains function to use for flight users! :)
             plaintext = get_template('mail/supervactivationEmail.txt')
             htmly = get_template('mail/supervactivationemail.html')
             d = Context({'name': this.name, 'lastname': this.lastname,
-                        'address': this.makeActivationLink(request.get_host())})
+                        'address': this.makeActivationLink(request)})
             subject, from_email, to = 'SharifcupRegister', 'info@sharifcup.sharif.ir', this.email
             text_content = plaintext.render(d)
             html_content = htmly.render(d)
@@ -207,7 +205,8 @@ class MyUser():  # this class contains function to use for flight users! :)
 
     def emailExists(this):  # this check if this email exists or not!
         try:
-            user = User.objects.filter(email=this.email).exclude(username=this.username)
+            user = User.objects.filter(
+                email=this.email).exclude(username=this.username)
             if user:
                 this.message['email'] = [this.__messages['emailExists'], ]
                 return True
@@ -237,21 +236,33 @@ class MyUser():  # this class contains function to use for flight users! :)
                 return True
         return False
 
-    def activateUserEmailAddress(this, email, text):
-        this.user = User.objects.get(email=email)
-        if this.user:
-            this.email = this.user.email
-            this.username = this.user.username
-            if text == this.makeActivationAddress():
-                this.user.is_active = True
-                this.user.save()
+    def canUpdateUser(this):  # this function will be executed when a new user must be created
+        if this.validateEmail():
+            if this.emailExists():
+                return False
+            elif this.__otherChecksForMake():
                 return True
+        return False
+
+    def activateUserEmailAddress(this, email, text):
+        try:
+            this.user = User.objects.get(email=email)
+        except:
+            pass
+        else:
+            if this.user:
+                this.email = this.user.email
+                this.username = this.user.username
+                if text == this.makeActivationAddress():
+                    this.user.is_active = True
+                    this.user.save()
+                    return True
         return False
 
     def makeActivationAddress(this):
         return hashlib.sha224(this.__securityString + this.email + this.username + str(this.user.date_joined)).hexdigest()
 
-    def makeActivationLink(this, address, checked=0):  # if checked is 0 wont get data from database
+    def makeActivationLink(this, request, checked=0):  # if checked is 0 wont get data from database
         if checked or this.updateInformation():
             text = this.makeActivationAddress()
-            return address + reverse('activate', args=(this.email, text))
+            return request.build_absolute_uri(reverse('activate', args=(this.email, text)))

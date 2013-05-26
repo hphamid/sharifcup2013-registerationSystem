@@ -113,6 +113,45 @@
       </div>
     </div>
   </div>
+  <div class="control-group {% if error.gender %}error{%endif%}">
+    <label class="control-label" for="gender">جنسیت</label>
+    <div class="controls">
+      <select name="gender" id="gender">
+        {% if oldValue.gender %}
+        {% else %}
+          <option value="" selected="selected" disabled="disabled">جنسیت</option>
+        {% endif %}
+        <option value="0"
+        {% if oldValue.gender == "0" %}
+        selected="selected"
+        {% endif %}>مرد</option>
+        <option value="1"
+        {% if oldValue.gender == "1" %}
+        selected="selected"
+        {% endif %}>زن</option>
+      </select>
+      {% for a in error.gender %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.night %}error{%endif%}">
+    <div class="controls">
+      <label class="checkbox">
+        <input name="night" value="1" id="night" type="checkbox"
+        {% if oldValue.night %}
+        checked="checked"
+        {% endif %}> برای اقامت به خوابگاه نیاز دارد.
+      </label>
+      {% for a in error.night %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
   <div class="control-group">
     <label class="control-label"></label>
     <div class="controls">

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
@@ -105,6 +105,8 @@ def participant(request, id=None):
         email = request.POST.get('email', '')
         phone = request.POST.get('phone', '')
         age = request.POST.get('age', '')
+        gender = request.POST.get('gender', '')
+        night = request.POST.get('night', '')
         if id:
             participant = get_object_or_404(
                 Participant, id=id, superviser=request.user)
@@ -118,6 +120,8 @@ def participant(request, id=None):
         participant.email = email
         participant.phone = phone
         participant.age = age
+        participant.gender = gender
+        participant.night = night
         participant.superviser = request.user
         participant.save()
         if participant.issaved():
@@ -136,7 +140,7 @@ def participant(request, id=None):
             participant.team = teams
             participant.save()
             if participant.email != oldEmail:
-                participant.sendMail(request.get_host())
+                participant.sendMail(request)
             return HttpResponseRedirect(reverse('listParticipant'))
         else:
             oldValue = {
@@ -146,6 +150,8 @@ def participant(request, id=None):
                 'email': email,
                 'phone': phone,
                 'age': age,
+                'gender': gender,
+                'night': night,
             }
             return render_to_response(
                 'Participant/create.html',
@@ -184,12 +190,18 @@ def listParticipant(request):
         {'participants': participants},)
 
 
-def activateParticipant(request, mail,text):
-    pass
+def activateParticipant(request, mail, text):
+    participant = get_object_or_404(Participant, email=mail)
+    if participant.activateUserEmailAddress(text):
+        return render_to_response('Participant/mailactivated.html', {'email': mail})
+    raise Http404
 
 
-def activate(request):
-    pass
+def activate(request, mail, text):
+    user = MyUser()
+    if user.activateUserEmailAddress(email=mail, text=text):
+        return render_to_response('registration/mailactivated.html', {'email': mail})
+    raise Http404
 
 
 def login(request):
@@ -197,8 +209,7 @@ def login(request):
         return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
     else:
         return views.login(request, template_name='registration/login.html',
-                           authentication_form=loginform,
-                           extra_context=None)
+                           authentication_form=loginform)
 
 
 def logout(request):
@@ -230,19 +241,25 @@ def register(request):
         email = request.POST.get('email', '')
         phone = request.POST.get('phone', '')
         age = request.POST.get('age', '')
+        gender = request.POST.get('gender', '')
+        night = request.POST.get('night', '')
         user = MyUser(username=username, password=password,
-                      password2=password2, name=name, lastname=lastname, nationalID=nationalID, email=email, phone=phone, age=age)
+                      password2=password2, name=name, lastname=lastname, nationalID=nationalID, email=email, phone=phone, age=age, gender=gender, night=night)
         if request.user.is_authenticated():
+            user.username = request.user.username
             user.updateUser(request)
             logedinUser = True
         else:
             user.makeUser(request)
             logedinUser = False
         if user.issaved():
-            return HttpResponseRedirect(reverse('profile'))
+            if logedinUser:
+                return HttpResponseRedirect(reverse('profile'))
+            else:
+                return render_to_response('registration/done.html')
         else:
             oldValue = user
-            print user.message
+            print user.night
             return render_to_response(
                 'registration/register.html',
                 {'oldValue': user, 'logedinUser':

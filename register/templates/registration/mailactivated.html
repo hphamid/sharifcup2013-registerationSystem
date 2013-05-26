@@ -1,0 +1,6 @@
+{% extends "main.html" %}
+{% block page %}
+<div class="textcontent" style="box-shadow:none;">
+  ایمیل شما با آدرس {{email}} تایید شد. حال برای ادامه دادن مراحل ثبت‌نام لازم است <a href="{% url 'login' %}">وارد</a> شوید.
+</div>
+{% endblock %}

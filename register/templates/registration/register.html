@@ -93,7 +93,7 @@
     </div>
   </div>
   <div class="control-group {% if error.email %}error{%endif%}">
-    <label class="control-label" for="email">ایمیل</label>
+    <label class="control-label" for="email1">ایمیل</label>
     <div class="controls">
       <input type="email" name = "email" value = "{{oldValue.email}}" id="email1" placeholder="ایمیل">
       {% for a in error.email %}
@@ -130,6 +130,45 @@
     <div class="controls">
       <input type="text" name = "phone" value = "{{oldValue.phone}}" id="phone" placeholder="تلفن">
       {% for a in error.phone %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.gender %}error{%endif%}">
+    <label class="control-label" for="gender">جنسیت</label>
+    <div class="controls">
+      <select name="gender" id="gender">
+        {% if oldValue.gender %}
+        {% else %}
+          <option value="" selected="selected" disabled="disabled">جنسیت</option>
+        {% endif %}
+        <option value="0"
+        {% if oldValue.gender == "0" %}
+        selected="selected"
+        {% endif %}>مرد</option>
+        <option value="1"
+        {% if oldValue.gender == "1" %}
+        selected="selected"
+        {% endif %}>زن</option>
+      </select>
+      {% for a in error.gender %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.night %}error{%endif%}">
+    <div class="controls">
+      <label class="checkbox">
+        <input name="night" value="1" id="night" type="checkbox"
+        {% if oldValue.night %}
+        checked="checked"
+        {% endif %}> برای اقامت به خوابگاه نیاز دارم.
+      </label>
+      {% for a in error.night %}
         <span class ="help-inline ">
           {{ a|safe }}
         </span>

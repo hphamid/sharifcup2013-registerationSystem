@@ -18,9 +18,19 @@ class Superviser(models.Model):
         'unique': u'کاربری با این شماره‌ی ملی قبلا ثبت‌نام کرده است!'
     }
     user = models.OneToOneField(User, default=0)
-    phone = models.CharField(max_length=20, blank=False, error_messages=messages)
-    nationalID = models.CharField(unique=True, max_length=11, blank=False, error_messages=messages)
+    phone = models.CharField(
+        max_length=20, blank=False, error_messages=messages)
+    nationalID = models.CharField(
+        unique=True, max_length=11, blank=False, error_messages=messages)
     age = models.CharField(max_length=3, blank=False, error_messages=messages)
+    male = "0"
+    female = "1"
+    available_status = ((male, 'male'),
+                        (female, 'female'),
+                        )
+    gender = models.CharField(
+        max_length=1, choices=available_status, blank=False)
+    night = models.BooleanField(default=False)
     errorMessage = {}
 
     def save(this, *args, **kwargs):
@@ -45,6 +55,7 @@ class Superviser(models.Model):
 
 class League(models.Model):
     name = models.CharField(max_length=20)
+    price = models.IntegerField(default=0)
 
     @staticmethod
     def nameAndId():
@@ -138,6 +149,14 @@ class Participant(models.Model):
     superviser = models.ForeignKey(User)
     team = models.ManyToManyField(Team, null=True, blank=True)
     activate = models.BooleanField(default=False)
+    male = "0"
+    female = "1"
+    available_status = ((male, 'male'),
+                        (female, 'female'),
+                        )
+    gender = models.CharField(
+        max_length=1, choices=available_status, blank=False)
+    night = models.BooleanField(default=False)
     is_active = models.PositiveSmallIntegerField(default=1)
     errorMessage = {}
     __securityString = "security string for increading something! :)))"
@@ -169,24 +188,24 @@ class Participant(models.Model):
 
     def activateUserEmailAddress(this, text):
         if text == this.makeActivationAddress():
-            this.user.activate = True
-            this.user.save()
+            this.activate = True
+            this.save()
             return True
         return False
 
     def makeActivationAddress(this):
         return hashlib.sha224(this.__securityString + this.email).hexdigest()
 
-    def makeActivationLink(this, address):
+    def makeActivationLink(this, request):
         text = this.makeActivationAddress()
-        return address + reverse('activate', args=(this.email, text))
+        return request.build_absolute_uri(reverse('activateParticipant', args=(this.email, text)))
 
-    def sendMail(this, address):  # this function send activation email! :) (the html part must be edited! :P)
+    def sendMail(this, request):  # this function send activation email! :) (the html part must be edited! :P)
         plaintext = get_template('mail/activationEmail.txt')
         htmly = get_template('mail/activationemail.html')
         d = Context({'name': this.name, 'lastname': this.fname,
                     'sname': this.superviser.first_name, 'sfname': this.superviser.last_name,
-                    'address': this.makeActivationLink(address)})
+                    'address': this.makeActivationLink(request)})
         subject, from_email, to = 'SharifcupRegister', 'info@sharifcup.sharif.ir', this.email
         text_content = plaintext.render(d)
         html_content = htmly.render(d)
