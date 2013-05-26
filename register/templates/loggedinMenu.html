@@ -1,4 +1,14 @@
+<li id="team"><a href="{% url 'listTeam' %}"><span class="melement">تیم‌ها</span></a>
+  <ul class="sub-menu">
+    <li id="createTeam"><a href="{% url 'createTeam' %}"><span class="melement">افزودن</span></a></li>
+    <li id="listTeam"><a href="{% url 'listTeam' %}"><span class="melement">لیست</span></a></li>
+  </ul>
+</li>
+<li id="participant"><a href="{% url 'listParticipant' %}"><span class="melement">اعضا</span></a>
+  <ul class="sub-menu">
+    <li id="createparticipant"><a href="{% url 'createParticipant' %}"><span class="melement">افزودن</span></a></li>
+    <li id="listparticipant"><a href="{% url 'listParticipant' %}"><span class="melement">لیست</span></a></li>
+  </ul>
+</li>
 <li id="profile"><a href="{% url 'profile' %}"><span class="melement">پروفایل</span></a></li>
-<li id="team"><a href="{% url 'listTeam' %}"><span class="melement">تیم‌ها</span></a></li>
-<li id="participant"><a href="{% url 'listParticipant' %}"><span class="melement">اعضا</span></a></li>
 <li id="logout"><a href="{% url 'logout' %}"><span class="melement">خروج</span></a></li>

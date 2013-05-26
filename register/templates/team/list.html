@@ -31,6 +31,9 @@
       <td  class ="dynamic"><span><a href = "{% url 'deleteTeam' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editTeam' a.id%}" style="color:blue">ویرایش</a> <a href = "{% url 'userTeam' a.id%}" style="color:blue">اعضا</a></span></td>
     </tr>
     {% endfor %}
+    <tr>
+      <td class="addnew" colspan="5" style="text-align:center"><a href = "{% url 'createTeam' %}" style="color:blue">اضافه کردن تیم جدید</a></td>
+    </tr>
   </tbody>
 </table>
 {% endblock %}

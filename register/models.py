@@ -175,7 +175,7 @@ class Participant(models.Model):
         return False
 
     def makeActivationAddress(this):
-        return hashlib.sha224(this.__securityString + this.email + this.nationalID).hexdigest()
+        return hashlib.sha224(this.__securityString + this.email).hexdigest()
 
     def makeActivationLink(this, address):
         text = this.makeActivationAddress()
@@ -185,6 +185,7 @@ class Participant(models.Model):
         plaintext = get_template('mail/activationEmail.txt')
         htmly = get_template('mail/activationemail.html')
         d = Context({'name': this.name, 'lastname': this.fname,
+                    'sname': this.superviser.first_name, 'sfname': this.superviser.last_name,
                     'address': this.makeActivationLink(address)})
         subject, from_email, to = 'SharifcupRegister', 'info@sharifcup.sharif.ir', this.email
         text_content = plaintext.render(d)

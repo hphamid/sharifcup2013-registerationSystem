@@ -25,9 +25,16 @@
 {% else %}
   {% url 'register' %}
 {% endif %}
-" method = "post" style="margin-top: 19px;">
+" method = "post">
   {% csrf_token %}
-  <div class="control-group">
+  <legend>
+    {% if logedinUser %}
+      ویرایش اطلاعات کاربری
+    {% else %}
+      ثبت نام
+    {% endif %}
+  </legend>
+  <div class="control-group {% if error.username %}error{%endif%}">
     <label class="control-label" for="username">نام کاربری</label>
     <div class="controls">
       <input type="text"
@@ -37,114 +44,98 @@
           disabled="disabled"
       {% endif %}
         value = "{{oldValue.username}}" id="username" placeholder="نام کاربری">
+      {% for a in error.username %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.username %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
   {% if not logedinUser %}
-    <div class="control-group">
+    <div class="control-group {% if error.password %}error{%endif%}">
       <label class="control-label" for="password">کلمه‌ی عبور</label>
       <div class="controls">
         <input type="password" name = "password" id="password" placeholder="کلمه‌ی عبور">
+        {% for a in error.password %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
       </div>
     </div>
-    {% for a in error.password %}
-       <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-    {% endfor %}
-    <div class="control-group">
+    <div class="control-group {% if error.password %}error{%endif%}">
       <label class="control-label" for="password2">تکرار کلمه‌ي عبور</label>
       <div class="controls">
         <input type="password" name = "password2" id="password2" placeholder="تکرار کلمه‌ی عبور">
       </div>
     </div>
   {% endif %}
-  <div class="control-group">
+  <div class="control-group {% if error.name %}error{%endif%}">
     <label class="control-label" for="name">نام</label>
     <div class="controls">
       <input type="text" name = "name" value = "{{oldValue.name}}" id="name" placeholder="نام">
+      {% for a in error.name %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.name %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
-  <div class="control-group">
-    <label class="control-label" for="lastname">نام</label>
+  <div class="control-group {% if error.lastname %}error{%endif%}">
+    <label class="control-label" for="lastname">نام خانوادگی</label>
     <div class="controls">
       <input type="text" name = "lastname" value = "{{oldValue.lastname}}" id="lastname" placeholder="نام خانوادگی">
+      {% for a in error.lastname %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.lastname %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
-  <div class="control-group">
+  <div class="control-group {% if error.email %}error{%endif%}">
     <label class="control-label" for="email">ایمیل</label>
     <div class="controls">
-      <input type="text" name = "email" value = "{{oldValue.email}}" id="emailب" placeholder="ایمیل">
+      <input type="email" name = "email" value = "{{oldValue.email}}" id="email1" placeholder="ایمیل">
+      {% for a in error.email %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.email %}
-    <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
-  <div class="control-group">
+  <div class="control-group {% if error.nationalID %}error{%endif%}">
     <label class="control-label" for="nationalID">شماره‌ی ملی</label>
     <div class="controls">
       <input type="text" name = "nationalID" value = "{{oldValue.nationalID}}" id="nationalID" placeholder="شماره‌ی ملی">
+      {% for a in error.nationalID %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.nationalID %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
-  <div class="control-group">
+  <div class="control-group {% if error.age %}error{%endif%}">
     <label class="control-label" for="age">سن</label>
     <div class="controls">
       <input type="text" name = "age" value = "{{oldValue.age}}" id="age" placeholder="سن">
+      {% for a in error.age %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.age %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
-  <div class="control-group">
+  <div class="control-group {% if error.phone %}error{%endif%}">
     <label class="control-label" for="phone">تلفن</label>
     <div class="controls">
       <input type="text" name = "phone" value = "{{oldValue.phone}}" id="phone" placeholder="تلفن">
+      {% for a in error.phone %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
     </div>
   </div>
-  {% for a in error.phone %}
-     <div class ="control-group " style="text-align:center">
-     <div class="span4 alert alert-error" style="margin-bottom:0px;">
-      {{ a|safe }}
-     </div>
-    </div>
-  {% endfor %}
   <div class="control-group">
     <label class="control-label"></label>
     <div class="controls">

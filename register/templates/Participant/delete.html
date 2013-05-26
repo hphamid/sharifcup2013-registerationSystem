@@ -1,10 +1,15 @@
 {% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
 {% block page %}
-شما می‌خواهید کاربر زیر را پاک کنید!
 <form action="{% url 'deleteParticipant' id %}" method = "post">
   {% csrf_token %}
-  آیا مطمئن هستید؟
-  <input type = "submit" name="approve" value="بلی"><br>
-<input type = "submit" value="خیر"><br>
+  <div class="form-actions">
+    شما می‌خواهید شرکت‌کننده <a href="{% url 'editParticipant' participant.id %}" style="color:blue">{{participant.name}} {{participant.fname}}</a> را پاک کنید. <br>
+  آیا مطمئن هستید؟ <br>
+    <button type="submit" class="btn">خیر</button>
+    <button type="submit" name="approve" value="بلی" class="btn btn-primary">بلی</button>
+  </div>
 </form>
 {% endblock page %}

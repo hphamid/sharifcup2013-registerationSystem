@@ -1,60 +1,123 @@
 {% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
 {% block page %}
 {% for a in error.all %}
-    {{ a|safe }}<br>
-  {% endfor %}
-<form action="
+  <div class="alert alert-error">
+    {{ a|safe }}
+  </div>
+{% endfor %}
+<form class="form-horizontal" action="
 {% if id %}
   {% url 'editParticipant' id %}
 {% else %}
   {% url 'createParticipant' %}
 {% endif %}
 " method = "post">
-  {% csrf_token %}
-  نام:
-  <input type = "text" name = "name" value = "{{oldValue.name}}"/><br>
-  {% for a in error.name %}
-    {{ a|safe }}<br>
-  {% endfor %}
-  نام خانوادگی:
-  <input type = "text" name = "fname" value = "{{oldValue.fname}}"/><br>
-  {% for a in error.fname %}
-    {{ a|safe }}<br>
-  {% endfor %}
-  ایمیل:
-  <input type = "text" name = "email" value = "{{oldValue.email}}"/><br>
-  {% for a in error.email %}
-    {{ a|safe }}<br>
-  {% endfor %}
-  شماره‌ی ملی:
-  <input type = "text" name = "nationalID" value = "{{oldValue.nationalID}}"/><br>
-  {% for a in error.nationalID %}
-    {{ a|safe }}<br>
-  {% endfor %}
-  سن:
-  <input type = "text" name = "age" value = "{{oldValue.age}}"/><br>
-  {% for a in error.age %}
-    {{ a|safe }}<br>
-  {% endfor %}
-  تلفن:
-  <input type = "text" name = "phone" value = "{{oldValue.phone}}"/><br>
-  {% for a in error.phone %}
-    {{ a|safe }}<br>
-  {% endfor %}
-‍  تیم:<br>
-{% for key, value in team.items %}
-  {% if value %}
-  {{key}}: <br>
-  {% for a in value %}
-    <input type="radio" name="league-{{ a.league.id }}" value="{{a.id}}"
-    {% if a in oldValue.team.all%}
-      checked="True"
+  <legend>
+    {% if oldValue.id %}
+      ویرایش شرکت‌کندده
+    {% else %}
+      افزودن شرکت‌کننده‌
     {% endif %}
-    >{{a}}<br>
-
-  {% endfor %}
-  {% endif %}
-{% endfor %}
-  <input type = "submit" value="ذخیره">
+  </legend>
+  {% csrf_token %}
+  <div class="control-group {% if error.name %}error{%endif%}">
+    <label class="control-label" for="name">نام</label>
+    <div class="controls">
+      <input type = "text" id="name" name = "name" value = "{{oldValue.name}}" placeholder="نام"/>
+      {% for a in error.name %}
+        <span class="help-inline">{{ a|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.fname %}error{%endif%}">
+    <label class="control-label" for="lastname">نام خانوادگی</label>
+    <div class="controls">
+      <input type="text" name = "fname" value = "{{oldValue.fname}}" id="lastname" placeholder="نام خانوادگی">
+      {% for a in error.fname %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.email %}error{%endif%}">
+    <label class="control-label" for="email">ایمیل</label>
+    <div class="controls">
+      <input type="email" name = "email" value = "{{oldValue.email}}" id="emailب" placeholder="ایمیل">
+      {% for a in error.email %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.nationalID %}error{%endif%}">
+    <label class="control-label" for="nationalID">شماره‌ی ملی</label>
+    <div class="controls">
+      <input type="text" name = "nationalID" value = "{{oldValue.nationalID}}" id="nationalID" placeholder="شماره‌ی ملی">
+      {% for a in error.nationalID %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.age %}error{%endif%}">
+    <label class="control-label" for="age">سن</label>
+    <div class="controls">
+      <input type="text" name = "age" value = "{{oldValue.age}}" id="age" placeholder="سن">
+      {% for a in error.age %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.phone %}error{%endif%}">
+    <label class="control-label" for="phone">تلفن</label>
+    <div class="controls">
+      <input type="text" name = "phone" value = "{{oldValue.phone}}" id="phone" placeholder="تلفن">
+      {% for a in error.phone %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="control-group {% if error.team %}error{%endif%}">
+    <label class="control-label">تیم:</label>
+    <div class="controls">
+      <div class= "offset2 span4">
+        {% for key, value in team.items %}
+          {% if value %}
+            {{key}}: <br>
+            {% for a in value %}
+              <label class="radio">
+                <input type="radio" name="league-{{ a.league.id }}" value="{{a.id}}"
+                {% if a in oldValue.team.all%}
+                checked="True"
+                {% endif %}
+                >{{a}}
+              </label>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+        {% for a in error.team %}
+        <span class ="help-inline ">
+          {{ a|safe }}
+        </span>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label"></label>
+    <div class="controls">
+      <button type="submit" class="btn btn-primary">ذخیره</button>
+    </div>
+  </div>
 </form>
 {% endblock page %}

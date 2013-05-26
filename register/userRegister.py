@@ -159,7 +159,7 @@ class MyUser():  # this class contains function to use for flight users! :)
             plaintext = get_template('mail/supervactivationEmail.txt')
             htmly = get_template('mail/supervactivationemail.html')
             d = Context({'name': this.name, 'lastname': this.lastname,
-                        'address': this.makeActivationLink(request.META['REMOTE_HOST'])})
+                        'address': this.makeActivationLink(request.get_host())})
             subject, from_email, to = 'SharifcupRegister', 'info@sharifcup.sharif.ir', this.email
             text_content = plaintext.render(d)
             html_content = htmly.render(d)

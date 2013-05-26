@@ -41,7 +41,7 @@ def createTeam(request, id=None):
         team.superviser = superviser
         team.save()
         if team.issaved():
-            return HttpResponse('ok')
+            return HttpResponseRedirect(reverse('listTeam'))
         else:
             oldValue = {
                 'name': name,
@@ -136,7 +136,7 @@ def participant(request, id=None):
             participant.team = teams
             participant.save()
             if participant.email != oldEmail:
-                participant.sendMail(request.META['REMOTE_HOST'])
+                participant.sendMail(request.get_host())
             return HttpResponseRedirect(reverse('listParticipant'))
         else:
             oldValue = {
@@ -184,7 +184,7 @@ def listParticipant(request):
         {'participants': participants},)
 
 
-def activateParticipant(request):
+def activateParticipant(request, mail,text):
     pass
 
 
@@ -251,4 +251,4 @@ def register(request):
 
 
 def redirect(request):
-    return HttpResponseRedirect(reverse('profile'))
+    return HttpResponseRedirect(reverse('listTeam'))
