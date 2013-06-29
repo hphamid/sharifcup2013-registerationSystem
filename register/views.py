@@ -22,20 +22,22 @@ def createTeam(request, id=None):
         return render_to_response(
             'team/create.html', {'leagues': League.nameAndId, 'oldValue': oldValue}, context_instance=RequestContext(request))
     else:
-        name = request.POST.get('name')
-        tleague = request.POST.get('league')
+        name = request.POST.get('name', '')
+        group = request.POST.get('group', '')
+        tleague = request.POST.get('league', '')
         superviser = request.user
         if tleague:
             league = League.objects.get(id=tleague)
         else:
             league = None
-        print league
+        # print league
         if id:
             team = get_object_or_404(
                 Team, id=id, superviser=request.user)
         else:
             team = Team()
         team.name = name
+        team.group = group
         if league:
             team.league = league
         team.superviser = superviser
@@ -45,7 +47,8 @@ def createTeam(request, id=None):
         else:
             oldValue = {
                 'name': name,
-                'league': league
+                'league': league,
+                'group': group,
             }
             return render_to_response(
                 'team/create.html', {'leagues': League.nameAndId, 'oldValue': oldValue, 'error': team.errorMessage}, context_instance=RequestContext(request))
@@ -86,6 +89,12 @@ def userTeam(request, id):
         {'users': team.participant_set.all},)
 
 
+def leagueTeams(request, id):
+    givenLeague = get_object_or_404(League, id=id)
+    team = Team.objects.filter(league=givenLeague)
+    return render_to_response("team/leagueTeams.html", {'teams': team, 'i': 0})
+
+
 @login_required
 def participant(request, id=None):
     if request.method == 'GET':
@@ -106,7 +115,7 @@ def participant(request, id=None):
         phone = request.POST.get('phone', '')
         age = request.POST.get('age', '')
         gender = request.POST.get('gender', '')
-        night = request.POST.get('night', '')
+        place = request.POST.get('place', '')
         if id:
             participant = get_object_or_404(
                 Participant, id=id, superviser=request.user)
@@ -121,7 +130,7 @@ def participant(request, id=None):
         participant.phone = phone
         participant.age = age
         participant.gender = gender
-        participant.night = night
+        participant.place = place
         participant.superviser = request.user
         participant.save()
         if participant.issaved():
@@ -151,7 +160,7 @@ def participant(request, id=None):
                 'phone': phone,
                 'age': age,
                 'gender': gender,
-                'night': night,
+                'place': place,
             }
             return render_to_response(
                 'Participant/create.html',
@@ -191,9 +200,12 @@ def listParticipant(request):
 
 
 def activateParticipant(request, mail, text):
-    participant = get_object_or_404(Participant, email=mail)
-    if participant.activateUserEmailAddress(text):
-        return render_to_response('Participant/mailactivated.html', {'email': mail})
+    try:
+        participant = get_object_or_404(Participant, email=mail)
+        if participant.activateUserEmailAddress(text):
+            return render_to_response('Participant/mailactivated.html', {'email': mail})
+    except:
+        pass
     raise Http404
 
 
@@ -242,9 +254,9 @@ def register(request):
         phone = request.POST.get('phone', '')
         age = request.POST.get('age', '')
         gender = request.POST.get('gender', '')
-        night = request.POST.get('night', '')
+        place = request.POST.get('place', '')
         user = MyUser(username=username, password=password,
-                      password2=password2, name=name, lastname=lastname, nationalID=nationalID, email=email, phone=phone, age=age, gender=gender, night=night)
+                      password2=password2, name=name, lastname=lastname, nationalID=nationalID, email=email, phone=phone, age=age, gender=gender, place=place)
         if request.user.is_authenticated():
             user.username = request.user.username
             user.updateUser(request)
@@ -259,7 +271,7 @@ def register(request):
                 return render_to_response('registration/done.html')
         else:
             oldValue = user
-            print user.night
+            print user.place
             return render_to_response(
                 'registration/register.html',
                 {'oldValue': user, 'logedinUser':

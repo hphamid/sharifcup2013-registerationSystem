@@ -4,8 +4,8 @@
 {% endblock %}
 {% block page %}
 <form class="form-horizontal" action="
-{% if id %}
-  {% url 'editTeam' id %}
+{% if oldValue.id %}
+  {% url 'editTeam' oldValue.id %}
 {% else %}
   {% url 'createTeam' %}
 {% endif %}
@@ -30,13 +30,22 @@
       {% endfor %}
     </div>
   </div>
+  <div class="control-group {% if error.group %}error{%endif%}">
+    <label class="control-label" for="group">نام موسسه</label>
+    <div class="controls">
+      <input type = "text" id="group" name = "group" value = "{{oldValue.group}}"/>
+      {% for a in error.group %}
+        <span class="help-inline">{{ a|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
   <div class="control-group {% if error.league %}error{%endif%}">
     <label class="control-label" for="league">لیگ</label>
     <div class="controls">
       <select id="league" name = "league">
         {% if oldValue.league %}
         {% else %}
-          <option value="" selected="selected" disabled="disabled">لیگ</option>
+          <option value="" selected="selected" disabled="disabled"></option>
         {% endif %}
         {% for key, value in leagues.items %}
           <option value="{{ value }}"

@@ -36,8 +36,10 @@
     </tr>
     {% endfor %}
   </tbody>
+  {% if not users %}
   <tr>
     <td class="addnew" colspan="5" style="text-align:center">این تیم به جز سرپرست عضو دیگری ندارد.</td>
   </tr>
+  {% endif %}
 </table>
 {% endblock %}

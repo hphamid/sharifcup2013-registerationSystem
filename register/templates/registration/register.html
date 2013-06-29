@@ -142,7 +142,7 @@
       <select name="gender" id="gender">
         {% if oldValue.gender %}
         {% else %}
-          <option value="" selected="selected" disabled="disabled">جنسیت</option>
+          <option value="" selected="selected" disabled="disabled"></option>
         {% endif %}
         <option value="0"
         {% if oldValue.gender == "0" %}
@@ -160,14 +160,23 @@
       {% endfor %}
     </div>
   </div>
-  <div class="control-group {% if error.night %}error{%endif%}">
+  <div class="control-group {% if error.place %}error{%endif%}">
+    <label class="control-label" for="place">وضعیت سکونت</label>
     <div class="controls">
-      <label class="checkbox">
-        <input name="night" value="1" id="night" type="checkbox"
-        {% if oldValue.night %}
+      <div>
+      <label class="radio">
+        <input name="place" value="0" class="place" type="radio"
+        {% if oldValue.place == "0" %}
         checked="checked"
-        {% endif %}> برای اقامت به خوابگاه نیاز دارم.
+        {% endif %}> داخل تهران
       </label>
+      <label class="radio">
+        <input name="place" value="1" class="place" type="radio"
+        {% if oldValue.place == "1" %}
+        checked="checked"
+        {% endif %}> خارج از تهران
+      </label>
+      </div>
       {% for a in error.night %}
         <span class ="help-inline ">
           {{ a|safe }}

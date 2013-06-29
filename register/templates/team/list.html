@@ -19,6 +19,7 @@
   <thead>
     <tr>
     <th>نام تیم</th>
+    <th>موسسه</th>
     <th>لیگ</th>
     <th></th>
     </tr>
@@ -27,6 +28,7 @@
     {% for a in teams %}
     <tr>
       <td>{{ a.name }}</td>
+      <td>{{ a.group }}</td>
       <td>{{ a.league.name }}</td>
       <td  class ="dynamic"><span><a href = "{% url 'deleteTeam' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editTeam' a.id%}" style="color:blue">ویرایش</a> <a href = "{% url 'userTeam' a.id%}" style="color:blue">اعضا</a></span></td>
     </tr>

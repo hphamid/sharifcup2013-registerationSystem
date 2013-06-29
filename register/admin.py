@@ -8,7 +8,7 @@ class ParticipantInline(admin.TabularInline):
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'league')
+    list_display = ('name', 'group', 'league')
     # filter_horizontal = ('ParticipantInline',)
     inlines = [ParticipantInline]
     save_on_top = True

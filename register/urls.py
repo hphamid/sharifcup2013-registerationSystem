@@ -23,6 +23,8 @@ urlpatterns += patterns('register.views',
                             'deleteTeam', name='deleteTeam'),
                         url(r'^team/users/(?P<id>\d+)/$',
                             'userTeam', name='userTeam'),
+                        url(r'^team/list/league/(?P<id>\d+)/$',
+                            'leagueTeams', name='leagueTeams'),
                         )
 urlpatterns += patterns('register.views',
                         url(r'^$', 'login', name='login'),

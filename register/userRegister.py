@@ -24,7 +24,7 @@ class MyUser():  # this class contains function to use for flight users! :)
                   }
     __securityString = "security string for increading something in MyUser! :)))"
 
-    def __init__(this, username=None, password=None, password2=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, gender=None, night=None, isActive=False, loginAfterRegister=False):
+    def __init__(this, username=None, password=None, password2=None, email=None, name=None, lastname=None, phone=None, nationalID=None, age=None, gender=None, place=None, isActive=False, loginAfterRegister=False):
         this.username = username
         this.email = email
         this.name = name
@@ -35,7 +35,7 @@ class MyUser():  # this class contains function to use for flight users! :)
         this.nationalID = nationalID
         this.age = age
         this.gender = gender
-        this.night = night
+        this.place = place
         this.user = None
         this.profile = None
         this.isActive = isActive
@@ -66,7 +66,7 @@ class MyUser():  # this class contains function to use for flight users! :)
             this.nationalID = this.profile.nationalID
             this.age = this.profile.age
             this.gender = this.profile.gender
-            this.night = this.profile.night
+            this.place = this.profile.place
             return True
         return False
 
@@ -141,7 +141,7 @@ class MyUser():  # this class contains function to use for flight users! :)
         this.profile.nationalID = this.nationalID
         this.profile.age = this.age
         this.profile.gender = this.gender
-        this.profile.night = this.night
+        this.profile.place = this.place
         this.profile.user = this.user
         this.profile.save()
         if this.profile.issaved():
@@ -260,7 +260,7 @@ class MyUser():  # this class contains function to use for flight users! :)
         return False
 
     def makeActivationAddress(this):
-        return hashlib.sha224(this.__securityString + this.email + this.username + str(this.user.date_joined)).hexdigest()
+        return hashlib.sha224(this.__securityString + this.email + str(this.user.date_joined)).hexdigest()
 
     def makeActivationLink(this, request, checked=0):  # if checked is 0 wont get data from database
         if checked or this.updateInformation():

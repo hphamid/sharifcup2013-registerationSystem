@@ -29,8 +29,15 @@ class Superviser(models.Model):
                         (female, 'female'),
                         )
     gender = models.CharField(
-        max_length=1, choices=available_status, blank=False)
-    night = models.BooleanField(default=False)
+        max_length=1, choices=available_status, blank=False, error_messages=messages)
+    tehran = "0"
+    notTehran = "1"
+    available_places = ((tehran, 'tehran'),
+                       (notTehran, 'not tehran'),
+                        )
+    place = models.CharField(
+        max_length=1, choices=available_places, blank=True, null=True)
+    extra = models.CharField(max_length=20, blank=True, null=True)
     errorMessage = {}
 
     def save(this, *args, **kwargs):
@@ -54,7 +61,7 @@ class Superviser(models.Model):
 
 
 class League(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
     price = models.IntegerField(default=0)
 
     @staticmethod
@@ -76,6 +83,8 @@ class Team(models.Model):
     }
     name = models.CharField(
         max_length=30, blank=False, error_messages=messages)
+    group = models.CharField(
+        max_length=70, blank=False, error_messages=messages)
     # users = models.ManyToManyField(Participant)
     superviser = models.ForeignKey(User)
     league = models.ForeignKey(League, blank=False, error_messages=messages)
@@ -134,7 +143,7 @@ class Participant(models.Model):
     }
     emailmessages = {
         'blank': u'این فیلد نمی‌تواند خالی باشد',
-        'invalid': u'ایمیل وارد شده صحیح نیست'
+        'invalid': u'ایمیل وارد شده صحیح نیست',
     }
     name = models.CharField(
         max_length=40, blank=False, error_messages=messages)
@@ -149,14 +158,22 @@ class Participant(models.Model):
     superviser = models.ForeignKey(User)
     team = models.ManyToManyField(Team, null=True, blank=True)
     activate = models.BooleanField(default=False)
+    tehran = "0"
+    notTehran = "1"
+    available_places = ((tehran, 'tehran'),
+                       (notTehran, 'not tehran'),
+                        )
+    place = models.CharField(
+        max_length=1, choices=available_places, blank=True, null=True)
     male = "0"
     female = "1"
     available_status = ((male, 'male'),
                         (female, 'female'),
                         )
     gender = models.CharField(
-        max_length=1, choices=available_status, blank=False)
+        max_length=1, choices=available_status, blank=False, error_messages=messages)
     night = models.BooleanField(default=False)
+    extra = models.CharField(max_length=20, blank=True, null=True)
     is_active = models.PositiveSmallIntegerField(default=1)
     errorMessage = {}
     __securityString = "security string for increading something! :)))"
@@ -167,6 +184,18 @@ class Participant(models.Model):
     #     if temp:
     #         raise ValidationError(
     #             'تیمی با نام وادر شده در این لیگ وجود دارد!')
+    def clean(this):
+        try:
+            Participant.objects.get(
+                superviser=this.superviser, email=this.email).exclude(id=this.id)
+        except:
+            pass
+        else:
+            this.errorMessage['all'] = [
+                'شما قبلا کاربری با ایمیل وارد شده ثبت کرده‌اید!']
+            raise ValidationError('all',
+                                  u'شما قبلا کاربری با ایمیل وارد شده ثبت کرده‌اید!')
+
     def save(this, *args, **kwargs):
         this.errorMessage = {}
         try:
