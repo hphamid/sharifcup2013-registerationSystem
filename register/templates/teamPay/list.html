@@ -1,0 +1,87 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+<style type="text/css">
+  td.dynamic span{
+    visibility: hidden;
+  }
+  td.dynamic span a{
+    padding-right:3px;
+    padding-left:3px;
+  }
+  .table tr:hover td.dynamic span{
+    visibility: visible;
+  }
+</style>
+<h3> تیم‌ها </h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+    <th>نام تیم</th>
+    <th>لیگ</th>
+    <th>هزینه</th>
+    <th>شناسه‌ی پرداخت</th>
+    <th>وضعیت</th>
+    <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if payList %}
+      {% for a in payList %}
+      <tr {% if a.isOk %}
+          class="success"
+        {% else %}
+          class="warning"
+        {% endif %}>
+        <td>{{ a.team.name }}</td>
+        <td>{{ a.team.league.name }}</td>
+        <td>{{ a.team.price }}</td>
+        <td>{{ a.paymentId }}</td>
+        <td>{% if a.isOk %}
+          تایید شده
+          {% else %}
+          در حال بررسی
+          {% endif %}</td>
+        <td  class ="dynamic"><span>{% if not a.isOk %}<a href = "{% url 'deleteTeamPayment' a.id%}" style="color:red">حذف</a> <a href = "{% url 'TeamPayment' a.team.id%}" style="color:blue">ویرایش</a>{% endif %}</span></td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan = "6" style="text-align:center">فاکتوری وجود ندارد!</td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+{% if night %}
+  <h3> خوابگاه </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+      <th>هزینه</th>
+      <th>شناسه‌ی پرداخت</th>
+      <th>وضعیت</th>
+      <th></th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr{% if night.isOk %}
+          class="success"
+        {% else %}
+          class="warning"
+        {% endif %}>
+          <td>{{ night.paid }}</td>
+          <td>{{ night.paymentId }}</td>
+          <td>{% if night.isOk %}
+            تایید شده
+            {% else %}
+            در حال بررسی
+            {% endif %}</td>
+          <td  class ="dynamic"><span>{% if not night.isOk %}<a href = "{% url 'deleteNight' %}" style="color:red">حذف</a> <a href = "{% url 'nightPay' %}" style="color:blue">ویرایش</a>{% endif %}</span></td>
+        </tr>
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}

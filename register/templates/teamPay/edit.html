@@ -1,0 +1,55 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+<form class="form-horizontal" action="{% url 'TeamPayment' team.id %}" method = "post">
+  {% csrf_token %}
+    <legend>پرداخت هزینه تیم {{ team.name }}</legend>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+        <th colspan = "2" style="text-align:center">بابت</th>
+        <th>مبلغ (تومان)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan = "2" style="text-align:center">شرکت تیم {{ team.name }} در لیگ {{ team.league.name }}</td>
+          <td>{{ team.teamPrice }},000</td>
+        </tr>
+        <tr>
+          <td >{{ superviser.first_name }} {{ superviser.last_name }}</td>
+          <td >سرپرست تیم</td>
+          <td>{{ team.PRICElIST.participant }},000</td>
+        </tr>
+        {% for user in users %}
+        <tr>
+          <td >{{ user.name }} {{ user.fname }}</td>
+          <td >شرکت‌کننده</td>
+          <td>{{ team.PRICElIST.participant }},000</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan = "2" style="text-align:center">مجموع</td>
+          <td>{{ team.price }},000</td>
+        </tr>
+      </tbody>
+    </table>
+  {% for a in error.all %}
+    <div class="alert alert-error">
+      {{ a|safe }}
+    </div>
+  {% endfor %}
+  <div class="control-group {% if error.name %}error{%endif%}">
+    <label class="control-label" for="paymentID">شناسه‌ی پرداخت</label>
+    <div class="controls">
+      <input type = "text" id="paymentId" name = "paymentId" value = "{{paymentId}}" placeholder="شناسه‌ي پرداخت"/>
+      {% for a in error.paymentId %}
+        <span class="help-inline">{{ a|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">ذخیره</button>
+</form>
+{% endblock page %}

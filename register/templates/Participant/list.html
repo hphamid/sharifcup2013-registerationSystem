@@ -44,7 +44,7 @@
           درحال بررسی
         {% endif %}
       </td>
-      <td  class ="dynamic"><span><a href = "{% url 'deleteParticipant' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editParticipant' a.id%}" style="color:blue">ویرایش</a></span></td>
+      <td  class ="dynamic"><span>{% if a.safeToRemove %}<a href = "{% url 'deleteParticipant' a.id%}" style="color:red">حذف</a>{% endif %} <a href = "{% url 'editParticipant' a.id%}" style="color:blue">ویرایش</a></span></td>
     </tr>
     {% endfor %}
     <tr>

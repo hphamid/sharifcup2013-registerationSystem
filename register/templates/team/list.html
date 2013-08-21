@@ -30,7 +30,7 @@
       <td>{{ a.name }}</td>
       <td>{{ a.group }}</td>
       <td>{{ a.league.name }}</td>
-      <td  class ="dynamic"><span><a href = "{% url 'deleteTeam' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editTeam' a.id%}" style="color:blue">ویرایش</a> <a href = "{% url 'userTeam' a.id%}" style="color:blue">اعضا</a></span></td>
+      <td  class ="dynamic"><span>{% if not a.paid %}<a href = "{% url 'deleteTeam' a.id%}" style="color:red">حذف</a> <a href = "{% url 'editTeam' a.id%}" style="color:blue">ویرایش</a>{% endif %} <a href = "{% url 'userTeam' a.id%}" style="color:blue">اعضا</a> <a href = "{% url 'TeamPayment' a.id%}" style="color:green">پرداخت</a></span></td>
     </tr>
     {% endfor %}
     <tr>

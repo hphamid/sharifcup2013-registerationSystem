@@ -60,7 +60,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = '/home/hamid/registerstatic'
+STATIC_ROOT = '/home/sharifcup/registerstatic'
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -158,7 +158,7 @@ LOGGING = {
 EMAIL_HOST = "mail.eeresana.com"
 EMAIL_HOST_PASSWORD = "1Hphamid"
 EMAIL_HOST_USER = "hamid@eeresana.com"
-DEFAULT_FROM_EMAIL = "admin@flypgs.com"
+DEFAULT_FROM_EMAIL = "info@sharifcup.sharif.ir"
 DEFAULT_FROM_NAME = "sharifcup"
 AUTH_PROFILE_MODULE = 'register.Superviser'
 LOGIN_URL = "/"

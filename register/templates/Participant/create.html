@@ -46,7 +46,7 @@
   <div class="control-group {% if error.email %}error{%endif%}">
     <label class="control-label" for="email">ایمیل</label>
     <div class="controls">
-      <input type="email" name = "email" value = "{{oldValue.email}}" id="emailب" placeholder="ایمیل">
+      <input type="email" name = "email" value = "{{oldValue.email}}" id="email" placeholder="ایمیل">
       {% for a in error.email %}
         <span class ="help-inline ">
           {{ a|safe }}
@@ -100,6 +100,9 @@
                 {% if a in oldValue.team.all%}
                 checked="True"
                 {% endif %}
+                {% if a.paid%}
+                disabled="True"
+                {% endif %}
                 >{{a}}
               </label>
             {% endfor %}
@@ -116,7 +119,9 @@
   <div class="control-group {% if error.gender %}error{%endif%}">
     <label class="control-label" for="gender">جنسیت</label>
     <div class="controls">
-      <select name="gender" id="gender">
+      <select name="gender" id="gender"{% if oldValue.isLocked %}
+        disabled="disabled"
+        {% endif %}>
         {% if oldValue.gender %}
         {% else %}
           <option value="" selected="selected" disabled="disabled"></option>

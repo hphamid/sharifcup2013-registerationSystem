@@ -37,24 +37,68 @@ class Superviser(models.Model):
                         )
     place = models.CharField(
         max_length=1, choices=available_places, blank=True, null=True)
-    extra = models.CharField(max_length=20, blank=True, null=True)
+    LOCK = "1"
+    UNLOCK = ""
+    NIGHT = "3"
+    is_activeChoices = ((LOCK, 'LOCK'),
+                        (UNLOCK, 'UNLOCK'),
+                        (NIGHT, 'NIGHT')
+                        )
+    extra = models.CharField(
+        choices=is_activeChoices, max_length=20, blank=True, null=True)
     errorMessage = {}
+
+    def lock(this):
+        if this.extra == this.UNLOCK or this.extra == this.NIGHT:
+            this.extra = this.LOCK
+            this.save()
+
+    def unlock(this):
+        if this.extra == this.LOCK or this.extra == this.NIGHT:
+            this.extra = this.NIGHT
+            this.save()
+
+    def setNight(this):
+        if this.extra == this.UNLOCK:
+            this.extra = this.NIGHT
+            this.save()
+
+    def unsetNight(this):
+        if this.extra == this.NIGHT:
+            this.extra = this.UNLOCK
+            this.save()
+
+    def isLocked(this):
+        return this.extra == this.LOCK
+
+    def isNight(this):
+        return this.extra == this.NIGHT or this.extra == this.LOCK
+
+    def safeToSave(this):
+        if this.extra == this.LOCK:
+            try:
+                old = Participant.objects.get(id=this.id)
+                this.gender = old.gender
+            except:
+                pass
+        return True
 
     def save(this, *args, **kwargs):
         this.errorMessage = {}
-        try:
-            this.full_clean()
-        except ValidationError as e:
-            for key, value in e.message_dict.items():
-                this.errorMessage[key] = []
-                for message in value:
-                    this.errorMessage[key].append(unicode(message))
-        else:
+        if this.safeToSave():
             try:
-                super(Superviser, this).save(*args, **kwargs)
-            except:
-                this.errorMessage['all'] = [
-                    'مشکلی در هنگام ذخیره به وجود آمد!']
+                this.full_clean()
+            except ValidationError as e:
+                for key, value in e.message_dict.items():
+                    this.errorMessage[key] = []
+                    for message in value:
+                        this.errorMessage[key].append(unicode(message))
+            else:
+                try:
+                    super(Superviser, this).save(*args, **kwargs)
+                except:
+                    this.errorMessage['all'] = [
+                        'مشکلی در هنگام ذخیره به وجود آمد!']
 
     def issaved(this):
         return not this.errorMessage
@@ -81,6 +125,7 @@ class Team(models.Model):
         'blank': u'این فیلد نمی‌تواند خالی باشد',
         'invalid': u'اطلاعات وارد شده معتبر نیست!'
     }
+    PRICElIST = {'team': 150, 'teamNew': 200, 'participant': 50}
     name = models.CharField(
         max_length=30, blank=False, error_messages=messages)
     group = models.CharField(
@@ -88,7 +133,17 @@ class Team(models.Model):
     # users = models.ManyToManyField(Participant)
     superviser = models.ForeignKey(User)
     league = models.ForeignKey(League, blank=False, error_messages=messages)
-    is_active = models.PositiveSmallIntegerField(default=1)
+    NEW = 2
+    OLD = 1
+    PAIDoLD = 3
+    PAIDnEW = 4
+    STATES = ((OLD, 'پیش ثبت‌نام شده.'),
+             (NEW, 'جدید'),
+             (PAIDoLD, 'پرداخت شده با هزینه‌ی کمتر'),
+             (PAIDnEW, 'پرداخت شده با جریمه!'),
+              )
+    is_active = models.PositiveSmallIntegerField(
+        choices=STATES, default=2)  # default is 2! to show these team are new! :P
     errorMessage = {}
 
     def clean(this):
@@ -101,27 +156,77 @@ class Team(models.Model):
                 raise ValidationError('all',
                                       u'تیمی با نام وارد شده در این لیگ وجود دارد!')
 
+    def paid(this):
+        return this.is_active == this.PAIDnEW or this.is_active == this.PAIDoLD
+
+    def lock(this):
+        if not this.paid():
+            this.justLocked = 1  # to show this object has just been locked and must be saved once! :)
+            if this.is_active == this.OLD:
+                this.is_active = this.PAIDoLD
+            else:
+                this.is_active = this.PAIDnEW
+            this.save()
+
+    def unlock(this):
+        if this.paid():
+            if this.is_active == this.PAIDoLD:
+                this.is_active = this.OLD
+            else:
+                this.is_active = this.NEW
+            this.save()
+
+    def safeToSave(this):
+        return (not this.paid()) or (hasattr(this, 'justLocked') and this.justLocked == 1)
+
+    def delete(this):
+        if this.safeToSave():
+            super(Team, this).delete()
+
     def save(this, *args, **kwargs):
         this.errorMessage = {}
-        try:
-            this.full_clean()
-        except ValidationError as e:
-            for key, value in e.message_dict.items():
-                this.errorMessage[key] = []
-                for message in value:
-                    this.errorMessage[key].append(unicode(message))
-        except:
-            this.errorMessage['all'] = [
-                'مشکلی در هنگام ذخیره به وجود آمد! لیگ را انتخاب کرده‌اید؟!']
-        else:
+        if this.safeToSave():
             try:
-                super(Team, this).save(*args, **kwargs)
+                this.full_clean()
+            except ValidationError as e:
+                for key, value in e.message_dict.items():
+                    this.errorMessage[key] = []
+                    for message in value:
+                        this.errorMessage[key].append(unicode(message))
             except:
                 this.errorMessage['all'] = [
-                    'مشکلی در هنگام ذخیره به وجود آمد!']
+                    'مشکلی در هنگام ذخیره به وجود آمد! لیگ را انتخاب کرده‌اید؟!']
+            else:
+                try:
+                    super(Team, this).save(*args, **kwargs)
+                except:
+                    this.errorMessage['all'] = [
+                        'مشکلی در هنگام ذخیره به وجود آمد!']
+        else:
+            this.errorMessage['all'] = [
+                'هزینه‌ی این تیم پرداخت شده است و امکان ایجاد تغییر در این تیم وجود ندارد.']
+        this.justLocked = 0
+
+    def price(this):
+        teamPrice = this.PRICElIST['participant'] + this.teamPrice()
+        for user in this.participant_set.all():
+            teamPrice = teamPrice + this.PRICElIST['participant']
+        return teamPrice
+
+    def teamPrice(this):
+        if this.is_active == this.OLD or this.is_active == this.PAIDoLD:
+            return this.PRICElIST['team']
+        else:
+            return this.PRICElIST['teamNew']
 
     def issaved(this):
         return not this.errorMessage
+
+    def uname(this):
+        return this.superviser.first_name + " " + this.superviser.last_name
+
+    def uemail(this):
+        return this.superviser.email
 
     @staticmethod
     def list(user):
@@ -174,7 +279,13 @@ class Participant(models.Model):
         max_length=1, choices=available_status, blank=False, error_messages=messages)
     night = models.BooleanField(default=False)
     extra = models.CharField(max_length=20, blank=True, null=True)
-    is_active = models.PositiveSmallIntegerField(default=1)
+    LOCK = 0
+    UNLOCK = 1
+    is_activeChoices = ((LOCK, 'LOCK'),
+                        (UNLOCK, 'UNLOCK'),
+                        )
+    is_active = models.PositiveSmallIntegerField(
+        choices=is_activeChoices, default=UNLOCK)
     errorMessage = {}
     __securityString = "security string for increading something! :)))"
 
@@ -184,15 +295,80 @@ class Participant(models.Model):
     #     if temp:
     #         raise ValidationError(
     #             'تیمی با نام وادر شده در این لیگ وجود دارد!')
+    def lock(this):
+        if this.is_active == this.UNLOCK:
+            this.is_active = this.LOCK
+            this.justLocked = 1
+            this.setNight()
+
+    def unlock(this):
+        if this.is_active == this.LOCK:
+            this.is_active = this.UNLOCK
+            this.justLocked = 1
+            this.save()
+
+    def setNight(this):
+        this.night = True
+        this.save()
+
+    def unsetNight(this):
+        this.night = False
+        this.save()
+
+    def isLocked(this):
+        return this.is_active == this.LOCK
+
+    def isNight(this):
+        return this.night
+
+    def safeToSave(this):
+        this.night = this.night or this.is_active == this.LOCK
+        if this.is_active == this.LOCK:
+            try:
+                old = Participant.objects.get(id=this.id)
+                this.gender = old.gender
+            except:
+                pass
+        return True
+
+    def safeToRemove(this):
+        safe = True
+        for obj in this.team.all():
+            if obj.paid():
+                safe = False
+        return safe and this.is_active == this.UNLOCK
+
+    def delete(this):
+        if this.safeToRemove():
+            super(Participant, this).delete()
+
+    def addTeam(this, teamList):
+        for obj in this.team.all():
+            if (not obj in teamList) and obj.paid():
+                message = "تیم " + obj.name + \
+                    "قفل شده است و امکان اضافه کردن شرکت‌کننده به آن وجود ندارد!"
+                this.errorMessage['all'] = [].append(message)
+        for obj in teamList:
+            if obj.paid() and (not obj in this.team.all()):
+                message = "تیم " + obj.name + \
+                    "قفل شده است و امکان اضافه کردن شرکت‌کننده به آن وجود ندارد!"
+                this.errorMessage['all'] = [].append(message)
+        if this.issaved():
+            this.team = teamList
+
     def clean(this):
+        if not this.safeToSave():
+            message = "امکان ایجاد تغییر در این شرکت کندده وجود ندارد."
+            this.errorMessage['all'] = [].append(message)
+            raise ValidationError('all', message)
         try:
             Participant.objects.get(
                 superviser=this.superviser, email=this.email).exclude(id=this.id)
         except:
             pass
         else:
-            this.errorMessage['all'] = [
-                'شما قبلا کاربری با ایمیل وارد شده ثبت کرده‌اید!']
+            this.errorMessage['all'] = [].append(
+                'شما قبلا کاربری با ایمیل وارد شده ثبت کرده‌اید!')
             raise ValidationError('all',
                                   u'شما قبلا کاربری با ایمیل وارد شده ثبت کرده‌اید!')
 
@@ -245,3 +421,179 @@ class Participant(models.Model):
 
     def __unicode__(this):
         return this.name + ' ' + this.fname
+
+
+class TeamPaid(models.Model):
+    messages = {
+        'blank': u'این فیلد نمی‌تواند خالی باشد',
+        'invalid': u'اطلاعات وارد شده معتبر نیست!',
+        'unique': u'این شناسهی پرداخت قبلا استفاده شده است.'
+    }
+    superviser = models.ForeignKey(User)
+    paid = models.IntegerField()
+    paymentId = models.CharField(
+        unique=True, blank=False, null=False, max_length=30, error_messages=messages)
+    team = models.ForeignKey(Team, blank=False, error_messages=messages)
+    isOk = models.BooleanField(default=0)
+    extra = models.PositiveSmallIntegerField(default=0)
+    errorMessage = {}
+
+    def clean(this):
+        try:
+            NightPaid.objects.get(paymentId=this.paymentId)
+        except:
+            pass
+        else:
+            this.errorMessage['all'] = [
+                'از این شناسه‌ی پرداخت قبلا استفاده شده است.']
+            raise ValidationError(
+                'از این شناسه‌ی پرداخت قبلا استفاده شده است.', 'all')
+        try:
+            this.team.lock()
+        except:
+            this.errorMessage['all'] = [
+                'مشکلی در هنگام ذخیره‌سازی به پجود آمد.']
+            raise ValidationError(
+                'all', 'مشکلی در هنگام ذخیره‌سازی به پجود آمد.')
+        finally:
+            try:
+                old = TeamPaid.objects.get(id=this.id)
+            except:
+                pass
+            else:
+                if old.isOk:
+                    this.errorMessage['all'] = [
+                        'این شناسه‌ی پرداخت تایید شده است و امکان ایجاد تغییر وجود ندارد.']
+                    raise ValidationError(
+                        'این شناسه‌ی پرداخت تایید شده است و امکان ایجاد تغییر وجود ندارد.', 'all')
+
+    def save(this, *args, **kwargs):
+        this.errorMessage = {}
+        this.paid = this.team.price()
+        try:
+            this.full_clean()
+        except ValidationError as e:
+            for key, value in e.message_dict.items():
+                this.errorMessage[key] = []
+                for message in value:
+                    this.errorMessage[key].append(unicode(message))
+        except:
+            this.errorMessage['all'] = [
+                'مشکلی در هنگام ذخیره به وجود آمد! لیگ را انتخاب کرده‌اید؟!']
+        else:
+            try:
+                super(TeamPaid, this).save(*args, **kwargs)
+            except:
+                this.errorMessage['all'] = [
+                    'مشکلی در هنگام ذخیره به وجود آمد!']
+
+    def delete(this):
+        if not this.isOk:
+            this.team.unlock()
+            super(TeamPaid, this).delete()
+
+    def issaved(this):
+        return not this.errorMessage
+
+    def __unicode__(this):
+        return this.team.name
+
+
+class NightPaid(models.Model):
+    messages = {
+        'blank': u'این فیلد نمی‌تواند خالی باشد',
+        'invalid': u'اطلاعات وارد شده معتبر نیست!',
+        'unique': u'این شناسهی پرداخت قبلا استفاده شده است.'
+    }
+    superviser = models.ForeignKey(User)
+    paid = models.IntegerField()
+    paymentId = models.CharField(
+        unique=True, blank=False, null=False, max_length=30, error_messages=messages)
+    users = models.ManyToManyField(Participant, blank=True, null=True)
+    superviserNight = models.BooleanField(default=False)
+    isOk = models.BooleanField(default=0)
+    extra = models.PositiveSmallIntegerField(default=0)
+    errorMessage = {}
+    PRICES = {'male': 70, 'female': 80}
+
+    def makePayment(this, plist):
+        this.paid = this.price(plist)
+        try:
+            for person in plist:
+                person.lock()
+            if this.superviserNight:
+                this.superviser.superviser.lock()
+        except:
+            this.errorMessage['all'] = [
+                'مشکلی در هنگام ذخیره به وجود آمد!']
+        this.save()
+        if this.issaved():
+            this.users = plist
+            this.save()
+
+    def price(this, plist):
+        price = 0
+        if this.superviserNight:
+            if this.superviser.superviser.gender == this.superviser.superviser.male:
+                price = price + this.PRICES['male']
+            else:
+                price = price + this.PRICES['female']
+        for user in plist:
+            if user.gender == user.male:
+                price = price + this.PRICES['male']
+            else:
+                price = price + this.PRICES['female']
+        return price
+
+    def clean(this):
+        try:
+            TeamPaid.objects.get(paymentId=this.paymentId)
+        except:
+            pass
+        else:
+            this.errorMessage['all'] = [
+                'از این شناسه‌ی پرداخت قبلا استفاده شده است.']
+            raise ValidationError(
+                'all', 'از این شناسه‌ی پرداخت قبلا استفاده شده است.')
+        try:
+            old = NightPaid.objects.get(id=this.id)
+        except:
+            pass
+        else:
+            if old.isOk:
+                this.errorMessage['all'] = [
+                    'این شناسه‌ی پرداخت تایید شده است و امکان ایجاد تغییر وجود ندارد.']
+                raise ValidationError(
+                    'این شناسه‌ی پرداخت تایید شده است و امکان ایجاد تغییر وجود ندارد.', 'all')
+
+    def save(this, *args, **kwargs):
+        this.errorMessage = {}
+        try:
+            this.full_clean()
+        except ValidationError as e:
+            for key, value in e.message_dict.items():
+                this.errorMessage[key] = []
+                for message in value:
+                    this.errorMessage[key].append(unicode(message))
+        except:
+            this.errorMessage['all'] = [
+                'مشکلی در هنگام ذخیره به وجود آمد!']
+        else:
+            try:
+                super(NightPaid, this).save(*args, **kwargs)
+            except:
+                this.errorMessage['all'] = [
+                    'مشکلی در هنگام ذخیره به وجود آمد!']
+
+    def delete(this):
+        if not this.isOk:
+            for person in this.users.all():
+                person.unlock()
+            this.superviser.superviser.unlock()
+            super(NightPaid, this).delete()
+
+    def issaved(this):
+        return not this.errorMessage
+
+    def __unicode__(this):
+        return this.superviser.first_name

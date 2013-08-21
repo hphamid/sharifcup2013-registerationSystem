@@ -8,7 +8,7 @@ class ParticipantInline(admin.TabularInline):
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'group', 'league')
+    list_display = ('name', 'group', 'uname', 'uemail', 'league')
     # filter_horizontal = ('ParticipantInline',)
     inlines = [ParticipantInline]
     save_on_top = True
@@ -17,9 +17,11 @@ admin.site.register(Team, TeamAdmin)
 
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'fname', 'superviser')
+    list_display = ('name', 'fname', 'superviser', 'place')
+    # readonly_fields = ('test',)
+                       # great!! you can show function output in readonly
+                       # fields! :P
     filter_horizontal = ('team',)
-    # inlines = [TeamInline]
     save_on_top = True
 admin.site.register(Participant, ParticipantAdmin)
 
@@ -27,15 +29,29 @@ admin.site.register(Participant, ParticipantAdmin)
 class LeagueAdmin(admin.ModelAdmin):
     list_display = ('name',)
     # filter_horizontal = ('league',)
-    # inlines = [WantKeyValueInline]
     save_on_top = True
 admin.site.register(League, LeagueAdmin)
 
 
 class SupervisorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'nationalID')
+    list_display = ('user', 'nationalID', 'place')
     # filter_horizontal = ('ParticipantInline',)
     # inlines = [ParticipantInline]
     save_on_top = True
-
 admin.site.register(Superviser, SupervisorAdmin)
+
+
+class TeamPaidAdmin(admin.ModelAdmin):
+    list_display = ('superviser', 'team', 'paymentId', 'paid', 'isOk')
+    # filter_horizontal = ('ParticipantInline',)
+    # inlines = [ParticipantInline]
+    save_on_top = True
+admin.site.register(TeamPaid, TeamPaidAdmin)
+
+
+class NightPaidAdmin(admin.ModelAdmin):
+    list_display = ('superviser', 'paymentId', 'paid', 'isOk')
+    # filter_horizontal = ('ParticipantInline',)
+    # inlines = [ParticipantInline]
+    save_on_top = True
+admin.site.register(NightPaid, NightPaidAdmin)

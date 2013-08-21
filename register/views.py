@@ -30,7 +30,6 @@ def createTeam(request, id=None):
             league = League.objects.get(id=tleague)
         else:
             league = None
-        # print league
         if id:
             team = get_object_or_404(
                 Team, id=id, superviser=request.user)
@@ -51,7 +50,9 @@ def createTeam(request, id=None):
                 'group': group,
             }
             return render_to_response(
-                'team/create.html', {'leagues': League.nameAndId, 'oldValue': oldValue, 'error': team.errorMessage}, context_instance=RequestContext(request))
+                'team/create.html', {
+                    'leagues': League.nameAndId, 'oldValue': oldValue, 'error': team.errorMessage},
+                context_instance=RequestContext(request))
 
 
 @login_required
@@ -137,7 +138,7 @@ def participant(request, id=None):
             leagues = League.nameAndId()
             teams = []
             for key, value in leagues.items():
-                temp = request.POST.get('league-' + str(value), 'hamid')
+                temp = request.POST.get('league-' + str(value), '')
                 if temp:
                     try:
                         toadd = Team.objects.get(
@@ -146,27 +147,25 @@ def participant(request, id=None):
                         pass
                     else:
                         teams.append(toadd)
-            participant.team = teams
-            participant.save()
+            participant.addTeam(teams)
             if participant.email != oldEmail:
                 participant.sendMail(request)
             return HttpResponseRedirect(reverse('listParticipant'))
-        else:
-            oldValue = {
-                'name': name,
-                'fname': fname,
-                'nationalID': nationalID,
-                'email': email,
-                'phone': phone,
-                'age': age,
-                'gender': gender,
-                'place': place,
-            }
-            return render_to_response(
-                'Participant/create.html',
-                {'team': Team.list(request.user),
-                 'error': participant.errorMessage, 'oldValue': oldValue, 'id': id},
-                context_instance=RequestContext(request))
+        oldValue = {
+            'name': name,
+            'fname': fname,
+            'nationalID': nationalID,
+            'email': email,
+            'phone': phone,
+            'age': age,
+            'gender': gender,
+            'place': place,
+        }
+        return render_to_response(
+            'Participant/create.html',
+            {'team': Team.list(request.user),
+             'error': participant.errorMessage, 'oldValue': oldValue, 'id': id},
+            context_instance=RequestContext(request))
 
 
 @login_required
@@ -256,7 +255,8 @@ def register(request):
         gender = request.POST.get('gender', '')
         place = request.POST.get('place', '')
         user = MyUser(username=username, password=password,
-                      password2=password2, name=name, lastname=lastname, nationalID=nationalID, email=email, phone=phone, age=age, gender=gender, place=place)
+                      password2=password2, name=name, lastname=lastname,
+                      nationalID=nationalID, email=email, phone=phone, age=age, gender=gender, place=place)
         if request.user.is_authenticated():
             user.username = request.user.username
             user.updateUser(request)
@@ -271,7 +271,6 @@ def register(request):
                 return render_to_response('registration/done.html')
         else:
             oldValue = user
-            print user.place
             return render_to_response(
                 'registration/register.html',
                 {'oldValue': user, 'logedinUser':
@@ -281,3 +280,123 @@ def register(request):
 
 def redirect(request):
     return HttpResponseRedirect(reverse('listTeam'))
+
+
+@login_required
+def teamPay(request, id):
+    team = get_object_or_404(
+        Team, id=id, superviser=request.user)
+    try:
+        teamPaid = TeamPaid.objects.get(team=team, superviser=request.user)
+    except:
+        teamPaid = TeamPaid(team=team, superviser=request.user)
+    if request.method == "GET":
+        return render_to_response(
+            'teamPay/edit.html',
+            {'users': team.participant_set.all, 'team': team,
+             'superviser': request.user, 'paymentId': teamPaid.paymentId, 'error': {}},
+            context_instance=RequestContext(request))
+    else:
+        teamPaid.paymentId = request.POST.get('paymentId', '')
+        teamPaid.save()
+        if teamPaid.issaved():
+            return HttpResponseRedirect(reverse('listTeamPayment'))
+        return render_to_response(
+            'teamPay/edit.html',
+            {'users': team.participant_set.all, 'team': team,
+             'superviser': request.user, 'paymentId': teamPaid.paymentId,
+             'error': teamPaid.errorMessage},
+            context_instance=RequestContext(request))
+
+
+@login_required
+def listTeamPay(request):
+    payments = TeamPaid.objects.filter(superviser=request.user)
+    try:
+        night = NightPaid.objects.get(superviser=request.user)
+    except:
+        night = None
+    return render_to_response(
+        'teamPay/list.html',
+        {'payList': payments, 'night': night})
+
+
+@login_required
+def deleteTeamPay(request, id):
+    teamPay = get_object_or_404(
+        TeamPaid, id=id, superviser=request.user)
+    if request.method == "GET":
+        return render_to_response(
+            'teamPay/delete.html',
+            {'team': teamPay.team, 'paymentId':
+                teamPay.paymentId, 'id': teamPay.id},
+            context_instance=RequestContext(request))
+    else:
+        if request.POST.get('approve', ''):
+            teamPay.delete()
+        return HttpResponseRedirect(reverse('listTeamPayment'))
+
+
+@login_required
+def night(request):
+    users = Participant.objects.filter(superviser=request.user)
+    if request.method == "POST":
+        for user in users:
+            if request.POST.get('user-' + str(user.id), ''):
+                user.setNight()
+            else:
+                user.unsetNight()
+        if request.POST.get('superviser', ''):
+            request.user.superviser.setNight()
+        else:
+            request.user.superviser.unsetNight()
+    return render_to_response(
+        'night/list.html',
+        {'users': users, 'superviser': request.user},
+        context_instance=RequestContext(request))
+
+
+@login_required
+def nightPay(request):
+    users = Participant.objects.filter(superviser=request.user)
+    usersList = []
+    errors = {}
+    try:
+        tempNightPay = NightPaid.objects.get(superviser=request.user)
+        paymentId = tempNightPay.paymentId
+    except:
+        tempNightPay = NightPaid()
+        tempNightPay.superviser = request.user
+        paymentId = ""
+    tempNightPay.superviserNight = request.user.superviser.isNight()
+    for user in users:
+        if user.isNight():
+            usersList.append(user)
+    price = tempNightPay.price(usersList)
+    if request.method == "POST":
+        paymentId = tempNightPay.paymentId = request.POST.get('paymentId')
+        tempNightPay.makePayment(usersList)
+        errors = tempNightPay.errorMessage
+        price = tempNightPay.price(usersList)
+        if tempNightPay.issaved():
+            return HttpResponseRedirect(reverse('night'))
+    return render_to_response(
+        'night/pay.html',
+        {'users': usersList, 'superviser':
+            request.user, 'price': price, 'priceList': NightPaid.PRICES, 'error': errors, 'paymentId': paymentId},
+        context_instance=RequestContext(request))
+
+
+@login_required
+def deleteNight(request):
+    nightPay = get_object_or_404(
+        NightPaid, superviser=request.user)
+    if request.method == "GET":
+        return render_to_response(
+            'night/delete.html',
+            {'paymentId': nightPay.paymentId},
+            context_instance=RequestContext(request))
+    else:
+        if request.POST.get('approve', ''):
+            nightPay.delete()
+        return HttpResponseRedirect(reverse('listTeamPayment'))

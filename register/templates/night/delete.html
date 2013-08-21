@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+
+<form action="{% url 'deleteNight' %}" method = "post">
+  {% csrf_token %}
+  <div class="form-actions">
+  	آیا می‌خواهید شناسه‌ی پرداخت {{paymentId}} مربوط به خوابگاه را حذف کنید؟
+    <button type="submit" class="btn">خیر</button>
+    <button type="submit" name="approve" value="بلی" class="btn btn-primary">بلی</button>
+  </div>
+</form>
+{% endblock page %}

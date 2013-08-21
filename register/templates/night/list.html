@@ -1,0 +1,49 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+<style type="text/css">
+  td.dynamic span{
+    visibility: hidden;
+  }
+  td.dynamic span a{
+    padding-right:3px;
+    padding-left:3px;
+  }
+  .table tr:hover td.dynamic span{
+    visibility: visible;
+  }
+</style>
+<form class="form-horizontal" action="{% url 'night' %}" method = "post">
+  {% csrf_token %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+      <th>خوابگاه</th>
+      <th>نام</th>
+      <th>نام خانوادگی</th>
+      <th>جنسیت</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><input type="checkbox" name="superviser" value="1" {%if superviser.superviser.isNight%} checked="True" {%endif%}{%if superviser.superviser.isLocked%} disabled="True" {%endif%}></td>
+          <td>{{ superviser.first_name }}</td>
+          <td>{{ superviser.last_name }}</td>
+          <td>{% if superviser.superviser.gender == superviser.superviser.male %} مرد{%else%} زن {%endif%}</td>
+        </tr>
+        {% for user in users %}
+        <tr>
+          <td><input type="checkbox" name="user-{{user.id}}" value="1" {%if user.isNight%} checked="True" {%endif%}{%if user.isLocked%} disabled="True" {%endif%}></td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.fname }}</td>
+          <td>{% if user.gender == user.male %} مرد{%else%} زن {%endif%}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  <button  type="submit" class="btn btn-primary">ذخیره</button>
+  <a href= "{% url 'nightPay' %}"><input TYPE="button" value = "پرداخت" class="btn"></a>
+</form>
+{% endblock %}

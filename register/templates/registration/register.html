@@ -139,7 +139,9 @@
   <div class="control-group {% if error.gender %}error{%endif%}">
     <label class="control-label" for="gender">جنسیت</label>
     <div class="controls">
-      <select name="gender" id="gender">
+      <select name="gender" id="gender" {% if oldValue.user.superviser.isLocked %}
+        disabled="disabled"
+        {% endif %}>
         {% if oldValue.gender %}
         {% else %}
           <option value="" selected="selected" disabled="disabled"></option>
@@ -147,7 +149,7 @@
         <option value="0"
         {% if oldValue.gender == "0" %}
         selected="selected"
-        {% endif %}>مرد</option>
+        {% endif %} >مرد</option>
         <option value="1"
         {% if oldValue.gender == "1" %}
         selected="selected"

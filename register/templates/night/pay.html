@@ -1,0 +1,53 @@
+{% extends "main.html" %}
+{% block menu %}
+  {% include 'loggedinMenu.html' %}
+{% endblock %}
+{% block page %}
+<form class="form-horizontal" action="{% url 'nightPay' %}" method = "post">
+  {% csrf_token %}
+    <legend>پرداخت هزینه خوابگاه</legend>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+        <th colspan = "2" style="text-align:center">بابت</th>
+        <th>مبلغ (تومان)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if superviser.superviser.isNight %}
+        <tr>
+          <td >{{ superviser.first_name }} {{ superviser.last_name }}</td>
+          <td >{% if superviser.superviser.gender == superviser.superviser.male %} خوابگاه پسران{%else%} خوابگاه دختران {%endif%}</td>
+          <td>{% if superviser.superviser.gender == superviser.superviser.male %} {{priceList.male}}{%else%} {{priceList.female}} {%endif%},000</td>
+        </tr>
+        {% endif %}
+        {% for user in users %}
+        <tr>
+          <td >{{ user.name }} {{ user.fname }}</td>
+          <td >{% if user.gender == user.male %} خوابگاه پسران{%else%} خوابگاه دختران {%endif%}</td>
+          <td>{% if user.gender == user.male %} {{priceList.male}}{%else%} {{priceList.female}} {%endif%},000</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td colspan = "2" style="text-align:center">مجموع</td>
+          <td>{{ price }},000</td>
+        </tr>
+      </tbody>
+    </table>
+  {% for a in error.all %}
+    <div class="alert alert-error">
+      {{ a|safe }}
+    </div>
+  {% endfor %}
+  <div class="control-group {% if error.name %}error{%endif%}">
+    <label class="control-label" for="paymentID">شناسه‌ی پرداخت</label>
+    <div class="controls">
+      <input type = "text" id="paymentId" name = "paymentId" value = "{{paymentId}}" placeholder="شناسه‌ي پرداخت"/>
+      {% for a in error.paymentId %}
+        <span class="help-inline">{{ a|safe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">ذخیره</button>
+</form>
+{% endblock page %}
