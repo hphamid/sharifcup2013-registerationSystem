@@ -200,8 +200,12 @@ def listParticipant(request):
 
 def activateParticipant(request, mail, text):
     try:
-        participant = get_object_or_404(Participant, email=mail)
-        if participant.activateUserEmailAddress(text):
+        participants = Participant.objects.filter(email=mail)
+        ok = True
+        for participant in participants:
+            if not participant.activateUserEmailAddress(text):
+                ok = False
+        if ok:
             return render_to_response('Participant/mailactivated.html', {'email': mail})
     except:
         pass
@@ -280,6 +284,56 @@ def register(request):
 
 def redirect(request):
     return HttpResponseRedirect(reverse('listTeam'))
+
+from register.forms import ChangePasswordForm
+
+
+@login_required
+def changePassword(request):
+    if request.method == "GET":
+        data = ChangePasswordForm()
+        return render_to_response('registration/changePassword.html',
+                                  {'form': data, 'error': ""},
+                                  context_instance=RequestContext(request))
+    else:
+        data = ChangePasswordForm(request.POST)
+        error = ""
+        if data.is_valid():
+            print data.cleaned_data
+            if request.user.check_password(data.cleaned_data['oldPassword']):
+                request.user.set_password(data.cleaned_data['newPassword'])
+                request.user.save()
+                return render_to_response('registration/changePasswordDone.html')
+            else:
+                error = 'پسورد وارد شده صحیح نمی‌باشد.'
+        return render_to_response('registration/changePassword.html',
+                                  {'form': data, 'error': error},
+                                  context_instance=RequestContext(request))
+
+
+def forgetPassword(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('changePassword'))
+    if request.method == "GET":
+        return render_to_response('registration/forgetPassword.html',
+                                  {'error': []},
+                                  context_instance=RequestContext(request))
+    else:
+        error = []
+        email = request.POST.get("email", '')
+        if email:
+            try:
+                user = User.objects.get(email=email)
+            except:
+                error.append('ایمیل وارد شده معتبر نمی‌باشد.')
+            else:
+                user.superviser.forgetPassword()
+                return render_to_response('registration/forgetPasswordDone.html')
+        else:
+            error.append('ایمیل نمی‌تواند خالی باشد.')
+        return render_to_response('registration/forgetPassword.html',
+                                  {'error': error},
+                                  context_instance=RequestContext(request))
 
 
 @login_required

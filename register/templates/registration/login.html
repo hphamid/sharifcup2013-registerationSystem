@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block page %}
-
-<form action="{{ app_path }}" method="post" id="login-form" class="span3" style="float:right;position: relative;top: 70px;right: 375px;">
+<div style="position: relative;top: 70px;right: 375px;">
+<form action="{{ app_path }}" method="post" id="login-form" class="span3" >
   {% csrf_token %}
   <div class="control-group {% if form.username.errors %}error{% endif %}">
     <div class="input-prepend">
@@ -28,6 +28,10 @@
     </a>
     <input type="submit" class="inline span2 btn btn-primary" name="register" value="ورود">
   </div>
+    <div style="text-align: center; margin-top: 15px;">
+     
+      <a href="{% url 'forgetPassword' %}" style="color:#00f"><span> نمی‌توانم وارد شوم!</span></a>
+    </div>
 </form>
-
+</div>
 {% endblock %}

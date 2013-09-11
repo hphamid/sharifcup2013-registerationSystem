@@ -4,11 +4,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 import hashlib
-from django.core.exceptions import ValidationError  # for validation purpose! :)
+# for validation purpose! :)
+from django.core.exceptions import ValidationError
 # for email in Participant
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
+import string
+import random
 
 
 class Superviser(models.Model):
@@ -59,7 +62,7 @@ class Superviser(models.Model):
             this.save()
 
     def setNight(this):
-        if this.extra == this.UNLOCK:
+        if this.extra != this.LOCK:
             this.extra = this.NIGHT
             this.save()
 
@@ -102,6 +105,30 @@ class Superviser(models.Model):
 
     def issaved(this):
         return not this.errorMessage
+
+    def forgetPassword(this):
+        password = this.__randomString()
+        this.user.set_password(password)
+        this.__sendMail(password)
+        this.user.save()
+        return password
+
+    def __randomString(this, size=10, chars=string.ascii_letters + string.digits):
+        return ''.join(random.choice(chars) for i in range(size))
+
+    def __sendMail(this, password):  # this function send activation email! :)
+        plaintext = get_template('mail/resetPassword.txt')
+        htmly = get_template('mail/resetPassword.html')
+        d = Context(
+            {'name': this.user.first_name, 'fname': this.user.last_name,
+             'uname': this.user.username, 'password': password})
+        subject, from_email, to = 'PasswordReset', 'info@sharifcup.sharif.ir', this.user.email
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(
+            subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
 
 
 class League(models.Model):
@@ -161,7 +188,9 @@ class Team(models.Model):
 
     def lock(this):
         if not this.paid():
-            this.justLocked = 1  # to show this object has just been locked and must be saved once! :)
+            # to show this object has just been locked and must be saved once!
+            # :)
+            this.justLocked = 1
             if this.is_active == this.OLD:
                 this.is_active = this.PAIDoLD
             else:
@@ -405,7 +434,7 @@ class Participant(models.Model):
         text = this.makeActivationAddress()
         return request.build_absolute_uri(reverse('activateParticipant', args=(this.email, text)))
 
-    def sendMail(this, request):  # this function send activation email! :) (the html part must be edited! :P)
+    def sendMail(this, request):  # this function send activation email! :)
         plaintext = get_template('mail/activationEmail.txt')
         htmly = get_template('mail/activationemail.html')
         d = Context({'name': this.name, 'lastname': this.fname,
@@ -438,6 +467,19 @@ class TeamPaid(models.Model):
     extra = models.PositiveSmallIntegerField(default=0)
     errorMessage = {}
 
+    def email(this):
+        return this.superviser.email
+    def phone(this):
+        return this.superviser.superviser.phone
+    def league(this):
+        return this.team.league
+    def users(this):
+        toReturn = "";
+        for participant in this.team.participant_set.all():
+            toReturn = toReturn + participant.name + " " + participant.fname + "-"
+        return toReturn
+    def price(this):
+        return this.team.price()
     def clean(this):
         try:
             NightPaid.objects.get(paymentId=this.paymentId)
@@ -514,7 +556,7 @@ class NightPaid(models.Model):
     isOk = models.BooleanField(default=0)
     extra = models.PositiveSmallIntegerField(default=0)
     errorMessage = {}
-    PRICES = {'male': 70, 'female': 80}
+    PRICES = {'male': 75, 'female': 75}
 
     def makePayment(this, plist):
         this.paid = this.price(plist)

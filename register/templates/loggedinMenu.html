@@ -12,5 +12,10 @@
 </li>
 <li id="factor"><a href="{% url 'listTeamPayment' %}"><span class="melement">فاکتور‌ها</span></a></li>
 <li id="night"><a href="{% url 'night' %}"><span class="melement">خوابگاه</span></a></li>
-<li id="profile"><a href="{% url 'profile' %}"><span class="melement">پروفایل</span></a></li>
+<li id="profile"><a href="{% url 'profile' %}"><span class="melement">پروفایل</span></a> 
+	<ul class="sub-menu">
+	    <li id="createparticipant"><a href="{% url 'profile' %}"><span class="melement">اطلاعات</span></a></li>
+	    <li id="listparticipant"><a href="{% url 'changePassword' %}"><span class="melement">کلمه‌ی عبور</span></a></li>
+  	</ul>
+</li>
 <li id="logout"><a href="{% url 'logout' %}"><span class="melement">خروج</span></a></li>
