@@ -1,0 +1,47 @@
+<style>
+#hor-minimalist-b {
+  width:90%;
+  border-collapse:collapse;
+  margin:20px;
+  text-align: center;
+}
+
+#hor-minimalist-b th {
+  font-size:14px;
+  font-weight:normal;
+  border-bottom:2px solid #ccc;
+  padding:10px 8px;
+}
+
+#hor-minimalist-b td {
+  border-bottom:1px solid #ccc;
+  padding:6px 8px;
+}
+
+#hor-minimalist-b tbody tr:hover td {
+  color:#009;
+}
+</style>
+<table id="hor-minimalist-b" summary="Employee Pay Sheet">
+  <thead>
+  <tr>
+    <th scope="col" style="width:50px;"></th>
+    <th scope="col">تیم</th>
+    <th scope="col">موسسه</th>
+  </tr>
+  </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr {% if team.isOk %}
+          style = "background-color:#0f0"
+          {%else%}
+          style = "background-color:#ff0" 
+          {%endif%}
+      >
+        <td>{{ forloop.counter }}</td>
+        <td>{{team.team.name}}</td>
+        <td>{{team.team.group}}</td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>

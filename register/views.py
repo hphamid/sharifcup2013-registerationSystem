@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
@@ -94,6 +94,12 @@ def leagueTeams(request, id):
     givenLeague = get_object_or_404(League, id=id)
     team = Team.objects.filter(league=givenLeague)
     return render_to_response("team/leagueTeams.html", {'teams': team, 'i': 0})
+
+
+def leagueTeamsFinal(request, id):
+    givenLeague = get_object_or_404(League, id=id)
+    teams = TeamPaid.objects.filter(team__league=givenLeague)
+    return render_to_response("team/leagueTeamsFinal.html", {'teams': teams, 'i': 0})
 
 
 @login_required
@@ -454,3 +460,101 @@ def deleteNight(request):
         if request.POST.get('approve', ''):
             nightPay.delete()
         return HttpResponseRedirect(reverse('listTeamPayment'))
+
+import csv
+
+
+@login_required
+def listUsersCSV(request):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="userList.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ['name',
+             'fname',
+             'email',
+             'phone',
+             'team name',
+             'league',
+             'price',
+             'isOk',
+             'superviser?',
+             ])
+        for paid in TeamPaid.objects.all():
+            writer.writerow(
+                [paid.team.superviser.first_name.encode('utf-8'),
+                 paid.team.superviser.last_name.encode(
+                 'utf-8'),
+                 paid.team.superviser.email.encode(
+                 'utf-8'),
+                 paid.team.superviser.superviser.phone.encode('utf-8'),
+                 paid.team.name.encode('utf-8'),
+                 paid.team.league,
+                 paid.price(),
+                 paid.isOk and '1' or '0',
+                 'superviser',
+                 ])
+            for user in paid.team.participant_set.all():
+                writer.writerow(
+                    [user.name.encode('utf-8'),
+                     user.fname.encode(
+                     'utf-8'),
+                     user.email.encode(
+                     'utf-8'),
+                     user.phone.encode('utf-8'),
+                     paid.team.name.encode('utf-8'),
+                     paid.team.league,
+                     paid.price(),
+                     paid.isOk and '1' or '0',
+                     ])
+        return response
+    raise HttpResponseForbidden()
+
+
+@login_required
+def superviserNightFinal(request):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="nightList.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ['name',
+             'fname',
+             'gender',
+             'email',
+             'phone',
+             'price',
+             'isOK?',
+             'superviser?',
+             ])
+        for paid in NightPaid.objects.all():
+            if paid.superviser.superviser.isLocked():
+                writer.writerow(
+                    [paid.superviser.first_name.encode('utf-8'),
+                     paid.superviser.last_name.encode(
+                     'utf-8'),
+                     paid.superviser.superviser.gender == paid.superviser.superviser.male and "male" or "female",
+                     paid.superviser.email.encode(
+                     'utf-8'),
+                     paid.superviser.superviser.phone.encode('utf-8'),
+                     paid.paid,
+                     paid.isOk and '1' or '0',
+                     'superviser',
+                     ])
+            for user in paid.users.all():
+                if user.isLocked():
+                    writer.writerow(
+                        [user.name.encode('utf-8'),
+                         user.fname.encode(
+                         'utf-8'),
+                         user.gender == user.male and "male" or "female",
+                         user.email.encode(
+                         'utf-8'),
+                         user.phone.encode(
+                         'utf-8'),
+                         paid.paid,
+                         paid.isOk and '1' or '0',
+                         ])
+        return response
+    raise HttpResponseForbidden()
