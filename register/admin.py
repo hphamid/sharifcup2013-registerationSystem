@@ -42,14 +42,17 @@ admin.site.register(Superviser, SupervisorAdmin)
 
 
 class TeamPaidAdmin(admin.ModelAdmin):
-    list_display = ('superviser', 'team','email', 'league', 'paymentId', 'paid', 'isOk')
-    readonly_fields = ('email', 'phone', 'users', 'price')
+    list_display = ('superviser', 'team', 'email',
+                    'league', 'paymentId', 'paid', 'isOk')
+    readonly_fields = ('email', 'phone', 'users', 'price', 'superviserName')
     save_on_top = True
 admin.site.register(TeamPaid, TeamPaidAdmin)
 
 
 class NightPaidAdmin(admin.ModelAdmin):
     list_display = ('superviser', 'paymentId', 'paid', 'isOk')
+    readonly_fields = ('email', 'phone', 'price', 'superviserName')
+    filter_horizontal = ('users',)
     # filter_horizontal = ('ParticipantInline',)
     # inlines = [ParticipantInline]
     save_on_top = True

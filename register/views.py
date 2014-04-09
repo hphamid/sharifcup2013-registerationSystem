@@ -516,7 +516,8 @@ def listUsersCSV(request):
 def superviserNightFinal(request):
     if request.user.is_staff:
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="nightList.csv"'
+        response[
+            'Content-Disposition'] = 'attachment; filename="nightList.csv"'
         writer = csv.writer(response)
         writer.writerow(
             ['name',
@@ -558,3 +559,137 @@ def superviserNightFinal(request):
                          ])
         return response
     raise HttpResponseForbidden()
+
+
+authorize = "salam123"
+
+
+def listTeamCSV(request):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='text/csv')
+        response[
+            'Content-Disposition'] = 'attachment; filename="TeamListPaziresh.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ['name',
+             'league',
+             'superviser',
+             'phone',
+             'isOK'
+             ])
+        for paid in TeamPaid.objects.all():
+            writer.writerow(
+                [paid.team.name.encode('utf-8'),
+                 paid.team.league.name.encode('utf-8'),
+                 paid.superviser.first_name.encode(
+                 'utf-8') + " " + paid.superviser.last_name.encode('utf-8'),
+                 paid.superviser.superviser.phone.encode('utf-8'),
+                 paid.isOk and '1' or '0',
+                 ])
+        return response
+    raise Http404
+
+
+def listTeamCSV(request):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='text/csv')
+        response[
+            'Content-Disposition'] = 'attachment; filename="TeamListPaziresh.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ['name',
+             'phonenumber',
+             'email',
+             'teamname',
+             'league',
+             'superviser',
+             'superviserEmail',
+             'phone',
+             ])
+        for team in Team.objects.all():
+            for()
+            writer.writerow(
+                [
+                 ])
+        return response
+    raise Http404
+
+
+def teamCountCSV(request):
+    if request.user.is_staff:
+        response = HttpResponse(content_type='text/csv')
+        response[
+            'Content-Disposition'] = 'attachment; filename="Teamcount.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ['name',
+             'league',
+             'count',
+             'isOk'
+             ])
+        for league in League.objects.all():
+            for paid in TeamPaid.objects.filter(team__league=league):
+                count = 1
+                for user in paid.team.participant_set.all():
+                    count = count + 1
+                writer.writerow(
+                    [paid.team.name.encode('utf-8'),
+                     paid.team.league.name.encode('utf-8'),
+                     str(count),
+                     paid.isOk and '1' or '0',
+                     ])
+        return response
+    raise Http404
+
+
+def listUsersPDF(request):
+    if request.GET.get("hpHamid", "") == authorize or True:
+        data = []
+        for paid in TeamPaid.objects.all().order_by('team__league'):
+            temp = ""
+            temp = temp + paid.superviser.first_name + ";" + \
+                paid.superviser.last_name + "*" + ";" + paid.team.name
+            data.append(temp)
+            for user in paid.team.participant_set.all():
+                temp = ""
+                temp = temp + user.name + ";" + \
+                    user.fname + ";" + paid.team.name
+                data.append(temp)
+
+        return HttpResponse("\n".join(data))
+    raise Http404
+
+
+def listDesk(request):
+    if request.GET.get("hpHamid", "") == authorize or True:
+        data = []
+        for league in League.objects.all():
+            index = 1
+            for paid in TeamPaid.objects.filter(team__league=league):
+                temp = ""
+                temp = temp + unicode(index) + ";" + paid.superviser.first_name + ";" + \
+                    paid.superviser.last_name + ";" + \
+                    paid.team.name + ";" + paid.team.league.name
+                data.append(temp)
+                index = index + 1
+        return HttpResponse("\n".join(data))
+    raise Http404
+
+
+def emailList(request):
+    if request.GET.get("hpHamid", "") == authorize:
+        data = []
+        for paid in TeamPaid.objects.all():
+            data.append(paid.superviser.email)
+        return HttpResponse("\n".join(data))
+    raise Http404
+
+
+def emailListLeague(request, id):
+    if request.GET.get("hpHamid", "") == authorize:
+        league = get_object_or_404(League, id=id)
+        data = []
+        for paid in TeamPaid.objects.filter(team__league=league):
+            data.append(paid.superviser.email)
+        return HttpResponse("\n".join(data))
+    raise Http404

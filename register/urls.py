@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url  # , include
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns('register.views',
                        url(r'^participant/create/$',
@@ -63,4 +63,10 @@ urlpatterns += patterns('register.views',
                         url(r'^finalUsers/$', 'listUsersCSV'),
                         url(r'^finalNightSuperviser/$',
                             'superviserNightFinal'),
+                        url(r'^cards/$', 'listUsersPDF'),
+                        url(r'^teamsPaziresh/$', 'listTeamCSV'),
+                        url(r'^desks/$', 'listDesk'),
+                        url(r'^emails/$', 'emailList'),
+                        url(r'^teamcount/$', 'teamCountCSV'),
+                        url(r'^emails/(?P<id>\d+)/$', 'emailListLeague'),
                         )

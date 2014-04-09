@@ -469,17 +469,26 @@ class TeamPaid(models.Model):
 
     def email(this):
         return this.superviser.email
+
     def phone(this):
         return this.superviser.superviser.phone
+
     def league(this):
         return this.team.league
+
+    def superviserName(this):
+        return this.superviser.first_name + " " + this.superviser.last_name
+
     def users(this):
-        toReturn = "";
+        toReturn = ""
         for participant in this.team.participant_set.all():
-            toReturn = toReturn + participant.name + " " + participant.fname + "-"
+            toReturn = toReturn + participant.name + \
+                " " + participant.fname + "-"
         return toReturn
+
     def price(this):
         return this.team.price()
+
     def clean(this):
         try:
             NightPaid.objects.get(paymentId=this.paymentId)
@@ -636,6 +645,15 @@ class NightPaid(models.Model):
 
     def issaved(this):
         return not this.errorMessage
+
+    def superviserName(this):
+        return this.superviser.first_name + " " + this.superviser.last_name
+
+    def email(this):
+        return this.superviser.email
+
+    def phone(this):
+        return this.superviser.superviser.phone
 
     def __unicode__(this):
         return this.superviser.first_name
